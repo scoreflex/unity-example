@@ -1,0 +1,24 @@
+#!/usr/bin/python -B
+import sys
+import mod_pbxproj
+import shutil
+from mod_pbxproj import XcodeProject
+from subprocess import call
+projectDir = sys.argv[1]
+scoreflexDir = projectDir + "/scoreflex"
+try:
+	shutil.copytree("Assets/Plugins/Scoreflex/iOS", scoreflexDir)
+	call(["unzip", "-o", scoreflexDir + "/ScoreflexResources.bundle.zip", "-d", scoreflexDir])
+except OSError:
+	print 'Scoreflex data already copied.'
+project = XcodeProject.Load(sys.argv[1] + "/Unity-iPhone.xcodeproj/project.pbxproj")
+group = project.get_or_create_group("Scoreflex")
+project.add_file(scoreflexDir + "/NativeBridge.m", parent=group)
+project.add_file(scoreflexDir + "/libScoreflex.a", parent=group)
+project.add_file(scoreflexDir + "/ScoreflexResources.bundle", parent=group)
+project.add_file(scoreflexDir + "/Scoreflex.h", parent=group)
+project.add_file(scoreflexDir + "/SXResponse.h", parent=group)
+project.add_file(scoreflexDir + "/SXview.h", parent=group)
+project.add_file('System/Library/Frameworks/MobileCoreServices.framework', tree='SDKROOT')
+project.add_file('System/Library/Frameworks/SystemConfiguration.framework', tree='SDKROOT')
+project.save()
