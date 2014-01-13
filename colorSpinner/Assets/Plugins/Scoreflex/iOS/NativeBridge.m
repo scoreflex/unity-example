@@ -66,7 +66,7 @@ void scoreflexSetUnityObjectName(const unichar *_unityObjectName)
 	scoreflexUnityObjectName = fromUnichar(_unityObjectName);
 }
 
-void scoreflexInitialize(const unichar *_id, const unichar *_secret, int _sandbox)
+void scoreflexSetClientId(const unichar *_id, const unichar *_secret, int _sandbox)
 {
 	NSString *identification = fromUnichar(_id);
 	NSString *secret = fromUnichar(_secret);
@@ -75,6 +75,19 @@ void scoreflexInitialize(const unichar *_id, const unichar *_secret, int _sandbo
 	NSLog(@"Initializing:\nid = %@\nsecret = %@\n_sandbox = %d", identification, secret, _sandbox);
 
 	[Scoreflex setClientId:identification secret:secret sandboxMode:sandbox];
+}
+
+void scoreflexListenForChallenges()
+{
+	[[NSNotificationCenter defaultCenter] addObserverForName:SX_NOTIFICATION_START_CHALLENGE object:nil queue:nil usingBlock:^(NSNotification *note) {
+			id challengeConfig = [note valueForKey:SX_NOTIFICATION_START_CHALLENGE_CONFIG_KEY];
+
+			NSError *error = nil;
+			NSData *_json = [NSJSONSerialization dataWithJSONObject:challengeConfig options:0 error:&error];
+			NSString *json = [[NSString alloc] initWithData:_json encoding:NSUTF8StringEncoding];
+		
+			UnitySendMessage([scoreflexUnityObjectName UTF8String], "HandleChallenge", [json UTF8String]);
+	}];
 }
 
 void scoreflexGetPlayerId(void *buffer, int bufferLength)
@@ -358,9 +371,9 @@ void scoreflexDelete(const unichar *_resource, const unichar *_params, const uni
 	}];
 }
 
-void scoreflexSubmitTurn(const unichar *_challengeInstanceId, const unichar *_params, const unichar *_handler)
+void scoreflexSubmitTurn(const unichar *_challengeInstanceId, int _score, const unichar *_params, const unichar *_handler)
 {
-	id params = kvccFromUnichar(_params);
+	id params = kvccWithScore(_params, _score);
 	NSString *challengeInstanceId = fromUnichar(_challengeInstanceId);
 	NSString *handler = stringOrNil(_handler);
 	[Scoreflex submitTurn:challengeInstanceId params:params
@@ -416,9 +429,9 @@ void scoreflexSubmitScoreAndShowRanksPanel(const unichar *_leaderboardId, int _s
 	scoreflexRankPanelView = [Scoreflex submitScoreAndShowRanksPanel:leaderboardId params:params gravity:gravity];
 }
 
-void scoreflexSubmitTurnAndShowChallengeDetail(const unichar *_challengeInstanceId, const unichar *_params)
+void scoreflexSubmitTurnAndShowChallengeDetail(const unichar *_challengeInstanceId, int _score, const unichar *_params)
 {
-	id params = kvccFromUnichar(_params);
+	id params = kvccWithScore(_params, _score);
 	NSString *challengeInstanceId = fromUnichar(_challengeInstanceId);
 	[Scoreflex submitTurnAndShowChallengeDetail:challengeInstanceId params:params];
 }

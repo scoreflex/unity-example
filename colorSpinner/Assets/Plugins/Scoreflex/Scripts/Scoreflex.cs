@@ -44,7 +44,8 @@ public class Scoreflex : MonoBehaviour
 		{
 			try
 			{
-				scoreflexInitialize(ClientId, ClientSecret, Sandbox);
+				scoreflexListenForChallenges();
+				scoreflexSetClientId(ClientId, ClientSecret, Sandbox);
 				scoreflexSetUnityObjectName(gameObject.name);
 
 				initialized = true;
@@ -60,6 +61,21 @@ public class Scoreflex : MonoBehaviour
 		else if(Instance != this)
 		{
 			GameObject.Destroy(gameObject);
+		}
+	}
+
+	public System.Action<Dictionary<string,object>> ChallengeHandlers = null;
+
+	void HandleChallenge(string figure)
+	{
+		if(ChallengeHandlers == null)
+		{
+			Debug.LogError("Scoreflex: Received challenge, but found no challenge handler! Please assign to Scoreflex.Instance.ChallengeHandlers");
+		}
+		else
+		{
+			var dict = MiniJSON.Json.Deserialize(figure) as Dictionary<string,object>;
+			ChallengeHandlers(dict);
 		}
 	}
 
@@ -388,7 +404,7 @@ public class Scoreflex : MonoBehaviour
 		return key;
 	}
 
-	public void SubmitTurn(string challengeInstanceId, Dictionary<string,object> parameters = null, System.Action<bool> callback = null)
+	public void SubmitTurn(string challengeInstanceId, int score, Dictionary<string,object> parameters = null, System.Action<bool> callback = null)
 	{
 		if(!Live) {
 			Debug.Log(ErrorNotLive);
@@ -401,7 +417,7 @@ public class Scoreflex : MonoBehaviour
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
-		scoreflexSubmitTurn(challengeInstanceId, json, handlerKey);
+		scoreflexSubmitTurn(challengeInstanceId, score, json, handlerKey);
 	}
 
 	public void SubmitScore(string leaderboardId, int score, Dictionary<string,object> parameters = null, System.Action<bool> callback = null)
@@ -432,7 +448,7 @@ public class Scoreflex : MonoBehaviour
 		scoreflexSubmitScoreAndShowRanksPanel(leaderboardId, score, json, (int) gravity);
 	}
 
-	public void SubmitTurnAndShowChallengeDetail(string challengeLeaderboardId, Dictionary<string,object> parameters = null)
+	public void SubmitTurnAndShowChallengeDetail(string challengeLeaderboardId, int score, Dictionary<string,object> parameters = null)
 	{
 		if(!Live) {
 			Debug.Log(ErrorNotLive);
@@ -441,7 +457,7 @@ public class Scoreflex : MonoBehaviour
 		
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
-		scoreflexSubmitTurnAndShowChallengeDetail(challengeLeaderboardId, json);
+		scoreflexSubmitTurnAndShowChallengeDetail(challengeLeaderboardId, score, json);
 	}
 	
 	#region Imports
@@ -474,10 +490,13 @@ public class Scoreflex : MonoBehaviour
 	private static extern void scoreflexSetUnityObjectName(string unityObjectName);
 
 	[DllImport ("__Internal", CharSet = CharSet.Unicode)]
-	private static extern void scoreflexInitialize(string clientId, string secret, bool sandbox);
+	private static extern void scoreflexSetClientId(string clientId, string secret, bool sandbox);
 
 	[DllImport ("__Internal")]
 	private static extern void scoreflexGetPlayerId(byte[] buffer, int bufferLength);
+
+	[DllImport ("__Internal")]
+	private static extern void scoreflexListenForChallenges();
 	
 	[DllImport ("__Internal")]
 	private static extern float scoreflexGetPlayingTime();
@@ -540,7 +559,7 @@ public class Scoreflex : MonoBehaviour
 	private static extern void scoreflexStopPlayingSession();
 	
 	[DllImport ("__Internal", CharSet = CharSet.Unicode)]
-	private static extern void scoreflexSubmitTurn(string challengeInstanceId, string json = null, string handler = null);
+	private static extern void scoreflexSubmitTurn(string challengeInstanceId, int score, string json = null, string handler = null);
 	
 	[DllImport ("__Internal", CharSet = CharSet.Unicode)]
 	private static extern void scoreflexSubmitScore(string leaderboardId, int score, string json = null, string handler = null);
@@ -549,7 +568,7 @@ public class Scoreflex : MonoBehaviour
 	private static extern void scoreflexSubmitScoreAndShowRanksPanel(string leaderboardId, int score, string json = null, int isOnTop = 1);
 
 	[DllImport ("__Internal", CharSet = CharSet.Unicode)]
-	private static extern void scoreflexSubmitTurnAndShowChallengeDetail(string challengeLeaderboardId, string json = null);
+	private static extern void scoreflexSubmitTurnAndShowChallengeDetail(string challengeLeaderboardId, int score, string json = null);
 	#endregion
 }
 

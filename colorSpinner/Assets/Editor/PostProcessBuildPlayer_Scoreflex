@@ -22,3 +22,16 @@ project.add_file(scoreflexDir + "/SXview.h", parent=group)
 project.add_file('System/Library/Frameworks/MobileCoreServices.framework', tree='SDKROOT')
 project.add_file('System/Library/Frameworks/SystemConfiguration.framework', tree='SDKROOT')
 project.save()
+
+appControllerFilename = projectDir + "/Classes/UnityAppController.mm"
+with open(appControllerFilename) as _code:
+        appControllerSource=_code.read()
+mustInjectHandleURL = appControllerSource.find("[Scoreflex handleURL:") == -1
+if mustInjectHandleURL:
+        queryString = "- (BOOL)application:(UIApplication*)application openURL:(NSURL*)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation\n{\n"
+        injectionPoint = appControllerSource.index(queryString) + len(queryString)
+        payloadOne = "#import \"Scoreflex/Scoreflex.h\"\n"
+        payloadTwo = "\t[Scoreflex handleURL:url sourceApplication:sourceApplication annotation:annotation];\n\n"
+        transformed = payloadOne + appControllerSource[:injectionPoint] + payloadTwo + appControllerSource[injectionPoint:]
+        with open(appControllerFilename, "w") as _code:
+                _code.write(transformed)

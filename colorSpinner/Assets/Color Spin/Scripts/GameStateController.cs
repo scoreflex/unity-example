@@ -44,7 +44,10 @@ public static class GameStateController
 	{
 		if(Scoreflex.Instance.Live)
 		{
-			Scoreflex.Instance.SubmitScoreAndShowRanksPanel(LeaderboardID, State.hits, gravity:Scoreflex.Gravity.Bottom);
+			if(State.challengeId == null)
+				Scoreflex.Instance.SubmitScoreAndShowRanksPanel(LeaderboardID, State.hits, gravity:Scoreflex.Gravity.Bottom);
+			else
+				Scoreflex.Instance.SubmitTurnAndShowChallengeDetail(State.challengeId, State.hits);
 		}
 		State = null;
 	}
@@ -61,5 +64,11 @@ public static class GameStateController
 			Scoreflex.Instance.HideRanksPanel();
 		}
 		State = new GameState();
+	}
+
+	public static void AcceptChallenge(string challengeId)
+	{
+		NewGame();
+		State.challengeId = challengeId;
 	}
 }
