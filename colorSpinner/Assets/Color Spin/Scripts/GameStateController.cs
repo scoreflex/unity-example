@@ -4,6 +4,7 @@ using System.Collections;
 public static class GameStateController
 {
 	public const string LeaderboardID = "Scores";
+	public const string DeveloperID = "018d9j7hg2cii8bh";
 	
 	const int maxMisses = 3;
 

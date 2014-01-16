@@ -9,10 +9,10 @@ public class Menu : MonoBehaviour
 	{
 		if(skin != null) GUI.skin = skin;
 
-		GUILayout.BeginArea(new Rect(10, 10, 96, 96));
+		GUILayout.BeginArea(new Rect(10, 10, 128, 96));
 		if(!GameStateController.IsSessionInProgress)
 		{
-			if(GUILayout.Button("Start"))
+			if(GUILayout.Button("Play Solo"))
 			{
 				GameStateController.NewGame();
 			}
@@ -30,10 +30,18 @@ public class Menu : MonoBehaviour
 			{
 				Scoreflex.Instance.ShowPlayerProfile();
 			}
-			/*if(GUILayout.Button("Challenges"))
+			if(GUILayout.Button("Leaderboards"))
+			{
+				Scoreflex.Instance.ShowLeaderboard(GameStateController.LeaderboardID);
+			}
+			if(GUILayout.Button("Play with friends"))
 			{
 				Scoreflex.Instance.ShowPlayerChallenges();
-			}*/
+			}
+			if(GUILayout.Button("More Games..."))
+			{
+				Scoreflex.Instance.ShowDeveloperGames(GameStateController.DeveloperID);
+			}
 		}
 		GUILayout.EndArea();
 	}

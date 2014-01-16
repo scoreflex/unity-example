@@ -1,4 +1,5 @@
 #import <Scoreflex/Scoreflex.h>
+#include <stdint.h>
 
 NSString * scoreflexUnityObjectName = @"Scoreflex";
 UIView * scoreflexRankPanelView = nil;
@@ -39,13 +40,13 @@ id kvccFromUnichar(const unichar *source)
 	return result;
 }
 
-id kvccWithScore(const unichar *source, int score)
+id kvccWithScore(const unichar *source, int64_t score)
 {
 	id parsed = kvccFromUnichar(source);
 	id result = nil;
 	
 	NSString * key = @"score";
-	NSString * value = [NSString stringWithFormat:@"%d", score];
+	NSString * value = [NSString stringWithFormat:@"%lld", (long long) score];
 	
 	if(parsed == nil || ![parsed isMemberOfClass:[NSDictionary class]])
 	{
@@ -264,7 +265,7 @@ void scoreflexShowPlayerSettings(const unichar *_params)
 	[Scoreflex showPlayerSettings:params];
 }
 
-void scoreflexShowRanksPanel(const unichar *_leaderboardId, int _score, const unichar *_params, int isOnTop)
+void scoreflexShowRanksPanel(const unichar *_leaderboardId, int64_t _score, const unichar *_params, int isOnTop)
 {
 	SXGravity gravity = isOnTop ? SXGravityTop : SXGravityBottom;
 	id params = kvccWithScore(_params, _score);
@@ -371,7 +372,7 @@ void scoreflexDelete(const unichar *_resource, const unichar *_params, const uni
 	}];
 }
 
-void scoreflexSubmitTurn(const unichar *_challengeInstanceId, int _score, const unichar *_params, const unichar *_handler)
+void scoreflexSubmitTurn(const unichar *_challengeInstanceId, int64_t _score, const unichar *_params, const unichar *_handler)
 {
 	id params = kvccWithScore(_params, _score);
 	NSString *challengeInstanceId = fromUnichar(_challengeInstanceId);
@@ -396,7 +397,7 @@ void scoreflexSubmitTurn(const unichar *_challengeInstanceId, int _score, const 
 	];
 }
 
-void scoreflexSubmitScore(const unichar *_leaderboardId, int _score, const unichar *_params, const unichar *_handler)
+void scoreflexSubmitScore(const unichar *_leaderboardId, int64_t _score, const unichar *_params, const unichar *_handler)
 {
 	id params = kvccWithScore(_params, _score);
 	NSString *leaderboardId = fromUnichar(_leaderboardId);
@@ -421,7 +422,7 @@ void scoreflexSubmitScore(const unichar *_leaderboardId, int _score, const unich
 	];
 }
 
-void scoreflexSubmitScoreAndShowRanksPanel(const unichar *_leaderboardId, int _score, const unichar *_params, int isOnTop)
+void scoreflexSubmitScoreAndShowRanksPanel(const unichar *_leaderboardId, int64_t _score, const unichar *_params, int isOnTop)
 {
 	SXGravity gravity = isOnTop ? SXGravityTop : SXGravityBottom;
 	id params = kvccWithScore(_params, _score);
@@ -429,7 +430,7 @@ void scoreflexSubmitScoreAndShowRanksPanel(const unichar *_leaderboardId, int _s
 	scoreflexRankPanelView = [Scoreflex submitScoreAndShowRanksPanel:leaderboardId params:params gravity:gravity];
 }
 
-void scoreflexSubmitTurnAndShowChallengeDetail(const unichar *_challengeInstanceId, int _score, const unichar *_params)
+void scoreflexSubmitTurnAndShowChallengeDetail(const unichar *_challengeInstanceId, int64_t _score, const unichar *_params)
 {
 	id params = kvccWithScore(_params, _score);
 	NSString *challengeInstanceId = fromUnichar(_challengeInstanceId);
