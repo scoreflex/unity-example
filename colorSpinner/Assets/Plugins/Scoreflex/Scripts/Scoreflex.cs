@@ -45,8 +45,8 @@ public class Scoreflex : MonoBehaviour
 			try
 			{
 				scoreflexListenForChallenges();
-				scoreflexSetClientId(ClientId, ClientSecret, Sandbox);
 				scoreflexSetUnityObjectName(gameObject.name);
+				scoreflexSetClientId(ClientId, ClientSecret, Sandbox);
 
 				initialized = true;
 			}
@@ -632,7 +632,7 @@ public class Scoreflex : MonoBehaviour
 	private static extern void scoreflexSubmitScoreAndShowRanksPanel(string leaderboardId, long score, string json = null, int isOnTop = 1);
 
 	[DllImport ("__Internal", CharSet = CharSet.Unicode)]
-	private static extern void scoreflexSubmitTurnAndShowChallengeDetail(string challengeLeaderboardId, long score, string json = null);
+	private static extern void scoreflexSubmitTurnAndShowChallengeDetail(string challengeId, long score, string json = null);
 	#endregion
 }
 

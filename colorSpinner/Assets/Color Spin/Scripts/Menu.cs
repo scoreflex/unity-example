@@ -9,7 +9,7 @@ public class Menu : MonoBehaviour
 	{
 		if(skin != null) GUI.skin = skin;
 
-		GUILayout.BeginArea(new Rect(10, 10, 128, 96));
+		GUILayout.BeginArea(new Rect(10, 10, 128, 192));
 		if(!GameStateController.IsSessionInProgress)
 		{
 			if(GUILayout.Button("Play Solo"))
