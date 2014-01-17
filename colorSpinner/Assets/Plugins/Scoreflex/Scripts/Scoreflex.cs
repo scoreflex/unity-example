@@ -623,7 +623,7 @@ public class Scoreflex : MonoBehaviour
 	private static extern void scoreflexStopPlayingSession();
 	
 	[DllImport ("__Internal", CharSet = CharSet.Unicode)]
-	private static extern void scoreflexSubmitTurn(string challengeInstanceId, long score, string json = null, string handler = null);
+	private static extern void scoreflexSubmitTurn(string challengeId, long score, string json = null, string handler = null);
 	
 	[DllImport ("__Internal", CharSet = CharSet.Unicode)]
 	private static extern void scoreflexSubmitScore(string leaderboardId, long score, string json = null, string handler = null);

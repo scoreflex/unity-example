@@ -68,8 +68,9 @@ id kvccWithScore(const unichar *source, int64_t score)
 	id result = nil;
 	
 	NSString * key = @"score";
-	NSString * value = [NSString stringWithFormat:@"%lld", (long long) score];
-	
+	NSNumber * value = [NSNumber numberWithLongLong:(long long)score];
+//	NSString * value = [NSString stringWithFormat:@"%lld", (long long) score];
+
 	if(parsed == nil || ![parsed isMemberOfClass:[NSDictionary class]])
 	{
 		result = [NSDictionary dictionaryWithObject:value forKey:key];
@@ -400,12 +401,12 @@ void scoreflexDelete(const unichar *_resource, const unichar *_params, const uni
 	}];
 }
 
-void scoreflexSubmitTurn(const unichar *_challengeInstanceId, int64_t _score, const unichar *_params, const unichar *_handler)
+void scoreflexSubmitTurn(const unichar *_challengeId, int64_t _score, const unichar *_params, const unichar *_handler)
 {
 	id params = kvccWithScore(_params, _score);
-	NSString *challengeInstanceId = fromUnichar(_challengeInstanceId);
+	NSString *challengeId = fromUnichar(_challengeId);
 	NSString *handler = stringOrNil(_handler);
-	[Scoreflex submitTurn:challengeInstanceId params:params
+	[Scoreflex submitTurn:challengeId params:params
 		handler:^(SXResponse *response , NSError *error) {
 			if(handler != nil)
 			{
@@ -458,9 +459,9 @@ void scoreflexSubmitScoreAndShowRanksPanel(const unichar *_leaderboardId, int64_
 	[ScoreflexBridgeState instance].rankPanelView = [Scoreflex submitScoreAndShowRanksPanel:leaderboardId params:params gravity:gravity];
 }
 
-void scoreflexSubmitTurnAndShowChallengeDetail(const unichar *_challengeInstanceId, int64_t _score, const unichar *_params)
+void scoreflexSubmitTurnAndShowChallengeDetail(const unichar *_challengeId, int64_t _score, const unichar *_params)
 {
 	id params = kvccWithScore(_params, _score);
-	NSString *challengeInstanceId = fromUnichar(_challengeInstanceId);
-	[Scoreflex submitTurnAndShowChallengeDetail:challengeInstanceId params:params];
+	NSString *challengeId = fromUnichar(_challengeId);
+	[Scoreflex submitTurnAndShowChallengeDetail:challengeId params:params];
 }
