@@ -26,12 +26,38 @@ project.save()
 appControllerFilename = projectDir + "/Classes/UnityAppController.mm"
 with open(appControllerFilename) as _code:
         appControllerSource=_code.read()
+
+mustInjectHeader = appControllerSource.find("Scoreflex/Scoreflex.h") == -1
+if mustInjectHeader:
+	payload ="#import \"Scoreflex/Scoreflex.h\"\n"
+	appControllerSource = payload + appControllerSource
+
 mustInjectHandleURL = appControllerSource.find("[Scoreflex handleURL:") == -1
 if mustInjectHandleURL:
-        queryString = "- (BOOL)application:(UIApplication*)application openURL:(NSURL*)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation\n{\n"
-        injectionPoint = appControllerSource.index(queryString) + len(queryString)
-        payloadOne = "#import \"Scoreflex/Scoreflex.h\"\n"
-        payloadTwo = "\t[Scoreflex handleURL:url sourceApplication:sourceApplication annotation:annotation];\n\n"
-        transformed = payloadOne + appControllerSource[:injectionPoint] + payloadTwo + appControllerSource[injectionPoint:]
-        with open(appControllerFilename, "w") as _code:
-                _code.write(transformed)
+	queryString = "- (BOOL)application:(UIApplication*)application openURL:(NSURL*)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation"
+	injectionPoint = appControllerSource.index(queryString)
+	while appControllerSource[injectionPoint - 1] != '{':
+		injectionPoint = injectionPoint + 1
+	payload = "\t[Scoreflex handleURL:url sourceApplication:sourceApplication annotation:annotation];\n\n"
+	appControllerSource = appControllerSource[:injectionPoint] + payload + appControllerSource[injectionPoint:]
+
+mustInjectHandleLaunch = appControllerSource.find("[Scoreflex handleApplicationLaunchWithOption:") == -1
+if mustInjectHandleLaunch:
+	queryString = "- (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions";
+	injectionPoint = appControllerSource.index(queryString)
+	while appControllerSource[injectionPoint - 1] != '{':
+		injectionPoint = injectionPoint + 1
+	payload = "\n\tif([Scoreflex handleApplicationLaunchWithOption:launchOptions])\n\t{\n\t\t[application cancelAllLocalNotifications];\n\t}\n\n"
+	appControllerSource = appControllerSource[:injectionPoint] + payload + appControllerSource[injectionPoint:]
+
+mustInjectHandleNotification = appControllerSource.find("[Scoreflex handleNotification:") == -1
+if mustInjectHandleNotification:
+	queryString = "- (void)application:(UIApplication*)application didReceiveRemoteNotification:(NSDictionary*)userInfo"
+	injectionPoint = appControllerSource.index(queryString)
+	while appControllerSource[injectionPoint - 1] != '{':
+		injectionPoint = injectionPoint + 1
+	payload = "\n\tif([application applicationState] == UIApplicationStateInactive)\n\t{\n\t\tif ([Scoreflex handleNotification:userInfo])\n\t\t{\n\t\t\t[application cancelAllLocalNotifications];\n\t\t}\n\t}\n"
+	appControllerSource = appControllerSource[:injectionPoint] + payload + appControllerSource[injectionPoint:]
+
+with open(appControllerFilename, "w") as _code:
+	_code.write(appControllerSource)
