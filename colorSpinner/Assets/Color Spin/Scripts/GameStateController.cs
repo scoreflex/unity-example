@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public static class GameStateController
 {
@@ -45,10 +45,17 @@ public static class GameStateController
 	{
 		if(Scoreflex.Instance.Live)
 		{
+
+
 			if(State.challengeId == null)
 				Scoreflex.Instance.SubmitScoreAndShowRanksPanel(LeaderboardID, State.hits, gravity:Scoreflex.Gravity.Bottom);
 			else
-				Scoreflex.Instance.SubmitTurnAndShowChallengeDetail(State.challengeId, State.hits);
+			{
+				var param = new Dictionary<string,object>();
+				param["turnSequence"] = ChallengeHandler.turnSequence as object;
+
+				Scoreflex.Instance.SubmitTurnAndShowChallengeDetail(State.challengeId, State.hits, param);
+			}
 		}
 		State = null;
 	}

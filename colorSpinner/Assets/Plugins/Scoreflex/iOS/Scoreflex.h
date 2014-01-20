@@ -228,6 +228,7 @@ typedef enum {
  */
 + (BOOL) handleURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation;
 
+
 ///---------------------------------------
 /// @name Scoreflex variables
 ///---------------------------------------
@@ -463,8 +464,42 @@ typedef enum {
 + (UIView *) showRanksPanel:(NSString *)leaderboardId params:(id)params gravity:(SXGravity)gravity;
 
 
+///---------------------------------------
+/// @name Social network helper
+///---------------------------------------
 
+/**
+ Post the specified link current facebook user wall
+ @param text The message that will be prefilled in the post.
+ @param title The title of the shared link.
+ @param url The URL to share.
+ */
 
++ (BOOL) shareOnFacebook:(NSString *)title text:(NSString *)text url:(NSString *) url;
+
+/**
+ Sends a facebook app request inviting a user (or a list of users) to install the game
+ @param text The message that will be prefilled in the invitation.
+ @param friends A list of friend you want to invite.
+ @param deepLink any data you want to attach to the invitation
+*/
++ (BOOL) sendFacebookInvitation:(NSString*)text friends:(NSArray*) friends deepLinkPath:(NSString *) deepLink;
+
+/**
+ Post the specified link current Google plus user
+ @param text The message that will be prefilled in the post.
+ @param url The URL to share.
+ */
++ (BOOL) shareOnGoogle:(NSString *) text url:(NSString *) url;
+
+/**
+ Attaches an `SXView` to your view hierarchy that displays the afterLevel Scoreflex widget.
+ @param text The message that will be prefilled in the invitation.
+ @param friends A list of friend you want to invite.
+ @param url The url your want to share on the interactive post button.
+ @param deepLink Any data you want to attach to the invitation.
+ */
++ (BOOL) sendGoogleInvitation:(NSString *)text friends:(NSArray *) friends url:(NSString *)url deepLinkPath:(NSString *)deepLink;
 
 
 
@@ -624,26 +659,25 @@ typedef enum {
         }
     }
 
- and
-
-    - (void)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-    {
-        if (launchOptions != nil)
-        {
-            NSDictionary *dictionary = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
-            if (dictionary != nil)
-            {
-                [Scoreflex handleNotification:dictionary];
-                [application cancelAllLocalNotifications];
-            }
-        }
-    }
-
-
  @param the notification dictionnary
  */
 + (BOOL) handleNotification:(NSDictionary*) notificationDictionnary;
 
+
+/**
+ Handle the Apple push notifications, to be called in your
+ 
+ - (void)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+ {
+    if ([Scoreflex handleNotification:launchOptions]) 
+    {
+        [application cancelAllLocalNotifications];
+    }
+ }
+ @param the launchOptions of your application
+
+ */
++ (BOOL) handleApplicationLaunchWithOption:(NSDictionary*) launchOptions;
 
 + (NSInteger) getPanelHeight;
 
