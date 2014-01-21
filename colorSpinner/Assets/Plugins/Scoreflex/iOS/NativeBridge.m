@@ -102,8 +102,14 @@ void scoreflexSetClientId(const unichar *_id, const unichar *_secret, int _sandb
 	[Scoreflex setClientId:identification secret:secret sandboxMode:sandbox];
 }
 
-void scoreflexListenForChallenges()
+void scoreflexListenForChallengesAndPlaySolo()
 {
+	[[NSNotificationCenter defaultCenter] addObserverForName:SX_NOTIFICATION_PLAY_LEVEL object:nil queue:nil usingBlock:^(NSNotification *note) {
+			NSString *leaderboardId = [[note userInfo] objectForKey:SX_NOTIFICATION_PLAY_LEVEL_LEADERBOARD_ID];
+
+			UnitySendMessage([[ScoreflexBridgeState instance].unityObjectName UTF8String], "HandlePlaySolo", [leaderboardId UTF8String]);
+	}];
+	
 	[[NSNotificationCenter defaultCenter] addObserverForName:SX_NOTIFICATION_START_CHALLENGE object:nil queue:nil usingBlock:^(NSNotification *note) {
 			id challengeConfig = [[note userInfo] objectForKey:SX_NOTIFICATION_START_CHALLENGE_CONFIG_KEY];
 

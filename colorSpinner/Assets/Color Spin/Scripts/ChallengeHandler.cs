@@ -5,10 +5,16 @@ public class ChallengeHandler : MonoBehaviour
 {
 	void Start()
 	{
+		Scoreflex.Instance.PlaySoloHandlers += HandlePlaySolo;
 		Scoreflex.Instance.ChallengeHandlers += HandleChallenge;
 	}
 
 	public static string turnSequence;
+
+	void HandlePlaySolo(string leaderboardId)
+	{
+		GameStateController.NewGame();
+	}
 
 	void HandleChallenge(Dictionary<string,object> challengeSpecifications)
 	{
@@ -35,6 +41,7 @@ public class ChallengeHandler : MonoBehaviour
 
 	void OnDestroy()
 	{
+		Scoreflex.Instance.PlaySoloHandlers -= HandlePlaySolo;
 		Scoreflex.Instance.ChallengeHandlers -= HandleChallenge;
 	}
 }

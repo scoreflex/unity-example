@@ -45,8 +45,6 @@ public static class GameStateController
 	{
 		if(Scoreflex.Instance.Live)
 		{
-
-
 			if(State.challengeId == null)
 				Scoreflex.Instance.SubmitScoreAndShowRanksPanel(LeaderboardID, State.hits, gravity:Scoreflex.Gravity.Bottom);
 			else
@@ -76,6 +74,10 @@ public static class GameStateController
 
 	public static void AcceptChallenge(string challengeId)
 	{
+		if(Scoreflex.Instance.Live)
+		{
+			Scoreflex.Instance.HideRanksPanel();
+		}
 		NewGame();
 		State.challengeId = challengeId;
 	}

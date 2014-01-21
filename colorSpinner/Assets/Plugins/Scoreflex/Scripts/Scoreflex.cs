@@ -44,7 +44,7 @@ public class Scoreflex : MonoBehaviour
 		{
 			try
 			{
-				scoreflexListenForChallenges();
+				scoreflexListenForChallengesAndPlaySolo();
 				scoreflexSetUnityObjectName(gameObject.name);
 				scoreflexSetClientId(ClientId, ClientSecret, Sandbox);
 
@@ -61,6 +61,20 @@ public class Scoreflex : MonoBehaviour
 		else if(Instance != this)
 		{
 			GameObject.Destroy(gameObject);
+		}
+	}
+	
+	public System.Action<string> PlaySoloHandlers = null;
+	
+	void HandlePlaySolo(string figure)
+	{
+		if(PlaySoloHandlers == null)
+		{
+			Debug.LogError("Scoreflex: Instructed to play solo, but no handlers configured! Please assign to Scoreflex.Instance.ChallengeHandlers");
+		}
+		else
+		{
+			PlaySoloHandlers(figure);
 		}
 	}
 
@@ -560,7 +574,7 @@ public class Scoreflex : MonoBehaviour
 	private static extern void scoreflexGetPlayerId(byte[] buffer, int bufferLength);
 
 	[DllImport ("__Internal")]
-	private static extern void scoreflexListenForChallenges();
+	private static extern void scoreflexListenForChallengesAndPlaySolo();
 	
 	[DllImport ("__Internal")]
 	private static extern float scoreflexGetPlayingTime();
