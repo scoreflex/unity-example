@@ -43,7 +43,7 @@ public partial class Scoreflex : MonoBehaviour
 	}
 
 	private const string ErrorNotLive = "Scoreflex: Method called while not live.";
-	
+
 	public System.Action<string> PlaySoloHandlers = null;
 	public System.Action<Dictionary<string,object>> ChallengeHandlers = null;
 
