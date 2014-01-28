@@ -46,13 +46,16 @@ public static class GameStateController
 		if(Scoreflex.Instance.Live)
 		{
 			if(State.challengeId == null)
+			{
 				Scoreflex.Instance.SubmitScoreAndShowRanksPanel(LeaderboardID, State.hits, gravity:Scoreflex.Gravity.Bottom);
+			}
 			else
 			{
 				var param = new Dictionary<string,object>();
 				param["turnSequence"] = ChallengeHandler.turnSequence as object;
 
 				Scoreflex.Instance.SubmitTurnAndShowChallengeDetail(State.challengeId, State.hits, param);
+				Scoreflex.Instance.SubmitScore(LeaderboardID, State.hits);
 			}
 		}
 		State = null;

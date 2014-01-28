@@ -10,17 +10,21 @@
 @end
 
 @implementation ScoreflexBridgeState
+@synthesize unityObjectName;
+@synthesize rankPanelView;
+@synthesize panelViews;
+
 + (ScoreflexBridgeState *)instance
 {
     static ScoreflexBridgeState *_instance = nil;
  
     if (_instance == nil) {
         _instance  = [[[self class] alloc] init];
-    }
 	
-	_instance.unityObjectName = @"Scoreflex";
-	_instance.rankPanelView = nil;
-	_instance.panelViews = [[NSMutableDictionary alloc] init];
+		_instance.unityObjectName = @"Scoreflex";
+		_instance.rankPanelView = nil;
+		_instance.panelViews = [[NSMutableDictionary alloc] init];
+    }
 	
 	return _instance;
 }
@@ -311,7 +315,15 @@ void scoreflexShowRanksPanel(const unichar *_leaderboardId, int64_t _score, cons
 void scoreflexHideRanksPanel()
 {
 	if([ScoreflexBridgeState instance].rankPanelView != nil)
+	{
+		NSLog(@"Calling for rank panel removal.");
 		[[ScoreflexBridgeState instance].rankPanelView removeFromSuperview];
+		
+	}
+	else
+	{
+		NSLog(@"Rank panel view is nil.");
+	};
 }
 
 void scoreflexShowSearch(const unichar *_params)

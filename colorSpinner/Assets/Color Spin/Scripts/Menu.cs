@@ -9,7 +9,7 @@ public class Menu : MonoBehaviour
 	{
 		if(skin != null) GUI.skin = skin;
 
-		Rect guiArea = new Rect { width = 128, height = 256 };
+		Rect guiArea = new Rect { width = 256, height = 256 };
 
 		if(GameStateController.IsSessionInProgress && !GameStateController.IsPaused)
 		{
