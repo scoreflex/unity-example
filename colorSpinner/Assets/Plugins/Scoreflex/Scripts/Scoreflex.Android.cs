@@ -42,26 +42,31 @@ public partial class Scoreflex
 
 	class ChallengeBroadcastReceiver: AndroidJavaProxy {
 
-		public ChallengeBroadcastReceiver(): base("com.scoreflex.unity3d.IBroadcastReceiver")
+		Scoreflex Instance;
+
+		public ChallengeBroadcastReceiver(Scoreflex instance): base("com.scoreflex.unity3d.IBroadcastReceiver")
 		{
+			Instance = instance;
 		}
 
 		void onReceive(AndroidJavaObject context, AndroidJavaObject intent)
 		{
-			if(Scoreflex.Instance != null && Scoreflex.Instance.ChallengeHandlers != null)
-			{
-				var scoreflexClass = new AndroidJavaClass("com.scoreflex.Scoreflex");
-				var constantID = AndroidJNI.GetStaticFieldID(scoreflexClass.GetRawClass(), "INTENT_START_CHALLENGE_EXTRA_CONFIG", "Ljava/lang/String;");
-				string constantValue = AndroidJNI.GetStaticStringField(scoreflexClass.GetRawClass(), constantID);
-				string jsonString = intent.Call<string>("getStringExtra", constantValue);
-				var result = MiniJSON.Json.Deserialize(jsonString) as Dictionary<string,object>;
-				Scoreflex.Instance.CallChallengeHandlers(result);
-			}
-			else
-			{
-				Debug.Log("Scoreflex: Challenge received, but there's no handler!");
-			}
+			Dictionary<string,object> packedIntent = new Dictionary<string,object> {
+				{ "intent", intent }
+			};
+			Instance.EnqueueCallback(Instance.ProcessChallengeBroadcast, true, packedIntent);
 		}
+	}
+
+	void ProcessChallengeBroadcast(bool junk, Dictionary<string,object> dict)
+	{
+		AndroidJavaObject intent = dict["intent"] as AndroidJavaObject;
+		var scoreflexClass = new AndroidJavaClass("com.scoreflex.Scoreflex");
+		var constantID = AndroidJNI.GetStaticFieldID(scoreflexClass.GetRawClass(), "INTENT_START_CHALLENGE_EXTRA_CONFIG", "Ljava/lang/String;");
+		string constantValue = AndroidJNI.GetStaticStringField(scoreflexClass.GetRawClass(), constantID);
+		string jsonString = intent.Call<string>("getStringExtra", constantValue);
+		var result = MiniJSON.Json.Deserialize(jsonString) as Dictionary<string,object>;
+		CallChallengeHandlers(result);
 	}
 
 	//These figures are derived from the Android SDK manual for android.view.Gravity.
@@ -89,7 +94,7 @@ public partial class Scoreflex
 
 				AndroidJavaClass localBroadcastManagerClass = new AndroidJavaClass("android.support.v4.content.LocalBroadcastManager");
 				var localBroadcastManager = localBroadcastManagerClass.CallStatic<AndroidJavaObject>("getInstance", unityActivity);
-				challengeBroadcastReceiver = new ChallengeBroadcastReceiver();
+				challengeBroadcastReceiver = new ChallengeBroadcastReceiver(this);
 				var challengeBroadcastReceiverBridge = new AndroidJavaObject("com.scoreflex.unity3d.BroadcastReceiver", challengeBroadcastReceiver);
 				var INTENT_START_CHALLENGE_ID = AndroidJNI.GetStaticFieldID(scoreflex.GetRawClass(), "INTENT_START_CHALLENGE", "Ljava/lang/String;");
 				string INTENT_START_CHALLENGE = AndroidJNI.GetStaticStringField(scoreflex.GetRawClass(), INTENT_START_CHALLENGE_ID);
