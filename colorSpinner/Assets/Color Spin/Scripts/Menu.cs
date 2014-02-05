@@ -5,6 +5,11 @@ public class Menu : MonoBehaviour
 {
 	public GUISkin skin;
 
+	void Update()
+	{
+		if(Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
+	}
+
 	void OnGUI()
 	{
 		if(skin != null) GUI.skin = skin;

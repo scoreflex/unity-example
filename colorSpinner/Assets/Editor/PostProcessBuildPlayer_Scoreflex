@@ -45,10 +45,15 @@ mustInjectHandleLaunch = appControllerSource.find("[Scoreflex handleApplicationL
 if mustInjectHandleLaunch:
 	queryString = "- (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions";
 	injectionPoint = appControllerSource.index(queryString)
+	methodInjectionPoint = injectionPoint
+	while appControllerSource[methodInjectionPoint - 1] != '}':
+		methodInjectionPoint = methodInjectionPoint - 1
 	while appControllerSource[injectionPoint - 1] != '{':
 		injectionPoint = injectionPoint + 1
-	payload = "\n\tif([Scoreflex handleApplicationLaunchWithOption:launchOptions])\n\t{\n\t\t[application cancelAllLocalNotifications];\n\t}\n\n"
+	payload = "\n\t[[UIApplication sharedApplication] registerForRemoteNotificationTypes:(UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];\n\n\tif (launchOptions != nil)\n\t{\n\t\tNSDictionary *userInfo = @{@\"launchOptions\":launchOptions,@\"application\":application};\n\t\t[NSTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(handleScoreflexNotification:) userInfo:userInfo repeats:NO];\n\t}\n\n"
+	methodPayload = "\n- (void) handleScoreflexNotification:(NSDictionary *) dictionnary\n{\n\tNSDictionary *userInfo = [dictionnary valueForKey:@\"userInfo\"];\n\tif([Scoreflex handleApplicationLaunchWithOption:[userInfo valueForKey:@\"launchOptions\"]])\n\t{\n\t\t[[userInfo valueForKey:@\"application\"] cancelAllLocalNotifications];\n\t}\n\n}"
 	appControllerSource = appControllerSource[:injectionPoint] + payload + appControllerSource[injectionPoint:]
+	appControllerSource = appControllerSource[:methodInjectionPoint] + methodPayload + appControllerSource[methodInjectionPoint:]
 
 mustInjectHandleNotification = appControllerSource.find("[Scoreflex handleNotification:") == -1
 if mustInjectHandleNotification:
@@ -57,6 +62,15 @@ if mustInjectHandleNotification:
 	while appControllerSource[injectionPoint - 1] != '{':
 		injectionPoint = injectionPoint + 1
 	payload = "\n\tif([application applicationState] == UIApplicationStateInactive)\n\t{\n\t\tif ([Scoreflex handleNotification:userInfo])\n\t\t{\n\t\t\t[application cancelAllLocalNotifications];\n\t\t}\n\t}\n"
+	appControllerSource = appControllerSource[:injectionPoint] + payload + appControllerSource[injectionPoint:]
+
+mustInjectHandleRegistration = appControllerSource.find("[Scoreflex setDeviceToken:") == -1
+if mustInjectHandleRegistration:
+	queryString = "- (void)application:(UIApplication*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken"
+	injectionPoint = appControllerSource.index(queryString)
+	while appControllerSource[injectionPoint - 1] != '{':
+		injectionPoint = injectionPoint + 1
+	payload = "\n\t[Scoreflex setDeviceToken:[deviceToken description]];\n\t"
 	appControllerSource = appControllerSource[:injectionPoint] + payload + appControllerSource[injectionPoint:]
 
 with open(appControllerFilename, "w") as _code:
