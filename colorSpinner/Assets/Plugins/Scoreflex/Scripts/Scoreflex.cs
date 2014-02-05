@@ -26,6 +26,8 @@ public partial class Scoreflex : MonoBehaviour
 		}
 	}
 
+	public delegate void Callback(bool success, Dictionary<string,object> response);
+
 	public static Scoreflex Instance { get; private set; }
 
 	public string ClientId;
@@ -45,6 +47,70 @@ public partial class Scoreflex : MonoBehaviour
 	public System.Action<string> PlaySoloHandlers = null;
 	public System.Action<Dictionary<string,object>> ChallengeHandlers = null;
 
+	private string PendingSoloPlayRequest = null;
+	private Dictionary<string,object> PendingChallengeRequest = null;
+
+	void CallPlaySoloHandlers(string s)
+	{
+		PendingSoloPlayRequest = s;
+	}
+
+	void CallChallengeHandlers(Dictionary<string,object> dict)
+	{
+		PendingChallengeRequest = dict;
+	}
+
+	void Update()
+	{
+		if(PendingSoloPlayRequest != null)
+		{
+			PlaySoloHandlers(PendingSoloPlayRequest);
+			PendingSoloPlayRequest = null;
+		}
+
+		if(PendingChallengeRequest != null)
+		{
+			ChallengeHandlers(PendingChallengeRequest);
+			PendingChallengeRequest = null;
+		}
+
+		PerformPendingCallbacks();
+	}
+	
+	class PendingCallback
+	{
+		public Callback method;
+		public bool success;
+		public Dictionary<string,object> dictionary;
+	}
+
+	private readonly Queue<PendingCallback> PendingCallbacks = new Queue<PendingCallback>();
+	
+	void PerformPendingCallbacks()
+	{
+		lock(PendingCallbacks)
+		{
+			while(PendingCallbacks.Count > 0)
+			{
+				var pendingCallback = PendingCallbacks.Dequeue();
+				pendingCallback.method(pendingCallback.success, pendingCallback.dictionary);
+			}
+		}
+	}
+
+	void EnqueueCallback(Callback callback, bool success, Dictionary<string,object> dictionary)
+	{
+		var pendingCallback = new PendingCallback {
+			method = callback,
+			success = success,
+			dictionary = dictionary
+		};
+		
+		lock(PendingCallbacks)
+		{
+			PendingCallbacks.Enqueue(pendingCallback);
+		}
+	}
 }
 
 

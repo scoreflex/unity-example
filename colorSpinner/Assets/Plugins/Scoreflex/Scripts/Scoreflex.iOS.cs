@@ -31,6 +31,69 @@ public partial class Scoreflex
 			GameObject.Destroy(gameObject);
 		}
 	}
+	
+	private readonly Dictionary<string,Callback> CallbackTable = new Dictionary<string,Callback>();
+	
+	string RegisterCallback(Callback callback)
+	{
+		string key;
+		var random = new System.Random();
+		do {
+			key = random.Next().ToString();
+		} while(CallbackTable.ContainsKey(key));
+		
+		CallbackTable[key] = callback;
+		
+		return key;
+	}
+	
+	void EnqueueCallbackByKey(string handlerKey, bool success, Dictionary<string,object> dictionary)
+	{
+		if(CallbackTable.ContainsKey(handlerKey))
+		{
+			EnqueueCallback(CallbackTable[handlerKey], success, dictionary);
+			
+			CallbackTable.Remove(handlerKey);
+		}
+		else
+		{
+			Debug.Log("Scoreflex: Received invalid callback code from native library: " + handlerKey);
+		}
+	}
+	
+	void HandleCallback(string figure)
+	{
+		if(figure.Contains(":"))
+		{
+			bool success = figure.Contains("success");
+			string handlerKey = figure.Split(':')[0];
+			string jsonString = figure.Substring(handlerKey.Length + ":success:".Length); // :failure is the same length
+			
+			var dictionary = new Dictionary<string,object>();
+			
+			try
+			{
+				if(jsonString.Length > 0)
+				{
+					var parsed = MiniJSON.Json.Deserialize(jsonString) as Dictionary<string,object>;
+					
+					foreach(var kvp in parsed)
+					{
+						dictionary.Add(kvp.Key, kvp.Value);
+					}
+				}
+			}
+			catch(System.Exception ex)
+			{
+				Debug.LogError("Scoreflex: Received unparsable JSON code: " + figure);
+			}
+			EnqueueCallbackByKey(handlerKey, success, dictionary);
+		}
+		else
+		{
+			Debug.Log("Scoreflex: Received invalid callback code from native library: " + figure);
+		}
+	}
 
 	void HandlePlaySolo(string figure)
 	{
@@ -54,50 +117,6 @@ public partial class Scoreflex
 		{
 			var dict = MiniJSON.Json.Deserialize(figure) as Dictionary<string,object>;
 			ChallengeHandlers(dict);
-		}
-	}
-
-	private readonly Dictionary<string,System.Action<bool,Dictionary<string,object>>> APICallbacks = new Dictionary<string,System.Action<bool,Dictionary<string,object>>>();
-
-	void HandleAPICallback(string figure)
-	{
-		if(figure.Contains(":"))
-		{
-			bool success = figure.Contains("success");
-			string handlerKey = figure.Split(':')[0];
-			if(SubmitCallbacks.ContainsKey(handlerKey))
-			{
-				string jsonString = figure.Substring(handlerKey.Length + ":success:".Length); // :failure is the same length
-
-				var dict = MiniJSON.Json.Deserialize(jsonString) as Dictionary<string,object>;
-
-				APICallbacks[handlerKey](success, dict);
-			}
-			APICallbacks.Remove(handlerKey);
-		}
-		else
-		{
-			Debug.Log("Scoreflex: Received invalid callback code from native library: " + figure);
-		}
-	}
-
-	private readonly Dictionary<string,System.Action<bool>> SubmitCallbacks = new Dictionary<string,System.Action<bool>>();
-
-	void HandleSubmit(string figure)
-	{
-		if(figure.Contains(":"))
-		{
-			bool success = figure.Contains("success");
-			string handlerKey = figure.Split(':')[0];
-			if(SubmitCallbacks.ContainsKey(handlerKey))
-			{
-				SubmitCallbacks[handlerKey](success);
-			}
-			SubmitCallbacks.Remove(handlerKey);
-		}
-		else
-		{
-			Debug.Log("Scoreflex: Received invalid callback code from native library: " + figure);
 		}
 	}
 
@@ -372,17 +391,7 @@ public partial class Scoreflex
 		scoreflexStopPlayingSession();
 	}
 
-	private static string CreateKeyForCallbackDictionary(System.Collections.IDictionary dictionary)
-	{
-		string key;
-		var random = new System.Random();
-		do {
-			key = random.Next().ToString();
-		} while(dictionary.Contains(key));
-		return key;
-	}
-
-	public void Get(string resource, Dictionary<string,object> parameters, System.Action<bool,Dictionary<string,object>> callback)
+	public void Get(string resource, Dictionary<string,object> parameters, Callback callback)
 	{
 		if(!Live) {
 			Debug.Log(ErrorNotLive);
@@ -390,31 +399,29 @@ public partial class Scoreflex
 			return;
 		}
 
-		string handlerKey = callback == null ? null : CreateKeyForCallbackDictionary(APICallbacks);
-		if(handlerKey != null) APICallbacks[handlerKey] = callback;
+		string handlerKey = callback == null ? null : RegisterCallback(callback);
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexGet(resource, json, handlerKey);
 	}
 
-	public void Put(string resource, Dictionary<string,object> parameters, System.Action<bool,Dictionary<string,object>> callback)
+	public void Put(string resource, Dictionary<string,object> parameters, Callback callback)
 	{
 		if(!Live) {
 			Debug.Log(ErrorNotLive);
 			if(callback != null) callback(false, new Dictionary<string,object>());
 			return;
 		}
-
-		string handlerKey = callback == null ? null : CreateKeyForCallbackDictionary(APICallbacks);
-		if(handlerKey != null) APICallbacks[handlerKey] = callback;
+		
+		string handlerKey = callback == null ? null : RegisterCallback(callback);
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexPut(resource, json, handlerKey);
 	}
 	
-	public void Post(string resource, Dictionary<string,object> parameters, System.Action<bool,Dictionary<string,object>> callback)
+	public void Post(string resource, Dictionary<string,object> parameters, Callback callback)
 	{
 		if(!Live) {
 			Debug.Log(ErrorNotLive);
@@ -422,72 +429,67 @@ public partial class Scoreflex
 			return;
 		}
 		
-		string handlerKey = callback == null ? null : CreateKeyForCallbackDictionary(APICallbacks);
-		if(handlerKey != null) APICallbacks[handlerKey] = callback;
+		string handlerKey = callback == null ? null : RegisterCallback(callback);
 		
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 		
 		scoreflexPost(resource, json, handlerKey);
 	}
 
-	public void PostEventually(string resource, Dictionary<string,object> parameters, System.Action<bool,Dictionary<string,object>> callback)
+	public void PostEventually(string resource, Dictionary<string,object> parameters, Callback callback)
 	{
 		if(!Live) {
 			Debug.Log(ErrorNotLive);
 			if(callback != null) callback(false, new Dictionary<string,object>());
 			return;
 		}
-
-		string handlerKey = callback == null ? null : CreateKeyForCallbackDictionary(APICallbacks);
-		if(handlerKey != null) APICallbacks[handlerKey] = callback;
+		
+		string handlerKey = callback == null ? null : RegisterCallback(callback);
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexPostEventually(resource, json, handlerKey);
 	}
 
-	public void Delete(string resource, Dictionary<string,object> parameters, System.Action<bool,Dictionary<string,object>> callback)
+	public void Delete(string resource, Dictionary<string,object> parameters, Callback callback)
 	{
 		if(!Live) {
 			Debug.Log(ErrorNotLive);
 			if(callback != null) callback(false, new Dictionary<string,object>());
 			return;
 		}
-
-		string handlerKey = callback == null ? null : CreateKeyForCallbackDictionary(APICallbacks);
-		if(handlerKey != null) APICallbacks[handlerKey] = callback;
+		
+		string handlerKey = callback == null ? null : RegisterCallback(callback);
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexDelete(resource, json, handlerKey);
 	}
 
-	public void SubmitTurn(string challengeInstanceId, long score, Dictionary<string,object> parameters = null, System.Action<bool> callback = null)
+	public void SubmitTurn(string challengeInstanceId, long score, Dictionary<string,object> parameters = null, Callback callback = null)
 	{
 		if(!Live) {
 			Debug.Log(ErrorNotLive);
-			if(callback != null) callback(false);
+			if(callback != null) callback(false, new Dictionary<string,object>());
 			return;
 		}
-
-		string handlerKey = callback == null ? null : CreateKeyForCallbackDictionary(SubmitCallbacks);
-		if(handlerKey != null) SubmitCallbacks[handlerKey] = callback;
+		
+		string handlerKey = callback == null ? null : RegisterCallback(callback);
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexSubmitTurn(challengeInstanceId, score, json, handlerKey);
 	}
 
-	public void SubmitScore(string leaderboardId, long score, Dictionary<string,object> parameters = null, System.Action<bool> callback = null)
+	public void SubmitScore(string leaderboardId, long score, Dictionary<string,object> parameters = null, Callback callback = null)
 	{
 		if(!Live) {
 			Debug.Log(ErrorNotLive);
-			if(callback != null) callback(false);
+			if(callback != null) callback(false, new Dictionary<string,object>());
 			return;
 		}
-
-		string handlerKey = callback == null ? null : CreateKeyForCallbackDictionary(SubmitCallbacks);
-		if(handlerKey != null) SubmitCallbacks[handlerKey] = callback;
+		
+		string handlerKey = callback == null ? null : RegisterCallback(callback);
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 

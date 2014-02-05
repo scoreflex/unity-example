@@ -365,7 +365,7 @@ void scoreflexAPICallback(SXResponse *response, NSError *error, NSString *handle
 			message = [NSString stringWithFormat:@"%@:failure:%@", handler, [error localizedDescription]];
 		}
 		
-		UnitySendMessage([[ScoreflexBridgeState instance].unityObjectName UTF8String], "HandleAPICallback", [message UTF8String]);
+		UnitySendMessage([[ScoreflexBridgeState instance].unityObjectName UTF8String], "HandleCallback", [message UTF8String]);
 	}
 }
 
@@ -426,20 +426,7 @@ void scoreflexSubmitTurn(const unichar *_challengeId, int64_t _score, const unic
 	NSString *handler = stringOrNil(_handler);
 	[Scoreflex submitTurn:challengeId params:params
 		handler:^(SXResponse *response , NSError *error) {
-			if(handler != nil)
-			{
-				NSString *message;
-				if(error == nil)
-				{
-					message = [NSString stringWithFormat:@"%@:success", handler];
-				}
-				else
-				{
-					message = [NSString stringWithFormat:@"%@:failure: %@", handler, [error localizedDescription]];
-				}
-				UnitySendMessage([[ScoreflexBridgeState instance].unityObjectName UTF8String], "HandleSubmit", [message UTF8String]);
-			}
-			NSLog(@"SubmitTurn Returned");
+			scoreflexAPICallback(response, error, handler);
 		}
 	];
 }
@@ -451,20 +438,7 @@ void scoreflexSubmitScore(const unichar *_leaderboardId, int64_t _score, const u
 	NSString *handler = stringOrNil(_handler);
 	[Scoreflex submitScore:leaderboardId params:params
 		handler:^(SXResponse *response , NSError *error) {
-			if(handler != nil)
-			{
-				NSString *message;
-				if(error == nil)
-				{
-					message = [NSString stringWithFormat:@"%@:success", handler];
-				}
-				else
-				{
-					message = [NSString stringWithFormat:@"%@:failure: %@", handler, [error localizedDescription]];
-				}
-				UnitySendMessage([[ScoreflexBridgeState instance].unityObjectName UTF8String], "HandleSubmit", [message UTF8String]);
-			}
-			NSLog(@"SubmitScore Returned");
+			scoreflexAPICallback(response, error, handler);
 		}
 	];
 }
