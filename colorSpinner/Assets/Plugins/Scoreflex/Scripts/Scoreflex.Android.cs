@@ -378,7 +378,7 @@ public partial class Scoreflex
 	{
 		unityActivity.Call("runOnUiThread", new AndroidJavaRunnable(() => {
 			var requestParams = CreateRequestParamsFromDictionary(parameters, score);
-			ranksPanelView = scoreflex.CallStatic<AndroidJavaObject>("showRanksPanel", unityActivity, leaderboardId, androidGravity[gravity], requestParams);
+			ranksPanelView = scoreflex.CallStatic<AndroidJavaObject>("showRanksPanel", unityActivity, leaderboardId, androidGravity[gravity], requestParams, true);
 		}));
 	}
 	

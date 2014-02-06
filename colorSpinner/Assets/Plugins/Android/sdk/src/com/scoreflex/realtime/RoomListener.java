@@ -53,7 +53,7 @@ public interface RoomListener {
    * <br>
    * This callback is called on the main thread.
    *
-   * @see Session#createRoom(String, RoomConfig, Map, Map)
+   * @see Session#createRoom
    *
    * @param status_code A status code indication the result of the operation.
    * @param room The room that was created. If an error occurred, the room is
@@ -106,7 +106,7 @@ public interface RoomListener {
    * <br>
    * This callback is called on the main thread.
    *
-   * @see Session#joinRoom(String, RoomConfig, Map)
+   * @see Session#joinRoo
    *
    * @param status_code A status code indication the result of the operation.
    * @param room The room that was joined. If an error occurred, the room is
@@ -133,7 +133,7 @@ public interface RoomListener {
    * <br>
    * This callback is called on the main thread.
    *
-   * @see Session#leaveRoom()
+   * @see Session#leaveRoom
    *
    * @param status_code A status code indication the result of the operation.
    * @param room_id The room's ID which was left.
@@ -189,9 +189,9 @@ public interface RoomListener {
    * <br>
    * This callback is called on the main thread.
    *
-   * @see Session#startMatch()
-   * @see Session#stopMatch()
-   * @see Session#resetMatch()
+   * @see Session#startMatch
+   * @see Session#stopMatch
+   * @see Session#resetMatch
    *
    * @param status_code A status code indication the result of the operation.
    * @param room The room.
@@ -204,13 +204,26 @@ public interface RoomListener {
   /**
    * This method is called when a property of a room change. This is done by
    * calling {@link Session#setRoomProperty(String, Object)}. If the operation
-   * succeed, all participants will be notified. But, he will be the only one
-   * notified when an error occurred.
+   * succeed, all participants will be notified.
+   * <br>
+   * This callback is called on the main thread.
+   *
+   * @see Session#setRoomProperty
+   *
+   * @param room The room.
+   * @param from The participant that performs the operation.
+   * @param key The property key that was changed.
+   */
+  public void onRoomPropertyChanged(Room room, Participant from, String key);
+
+
+  /**
+   * This method is called when a call to {@link Session#setRoomProperty(String,
+   * Object)} failed.
    * <br>
    * Possible status codes are:
    *
    * <ul>
-   *   <li>{@link Session#STATUS_SUCCESS} The room's property has changed.</li>
    *   <li>{@link Session#STATUS_SESSION_NOT_CONNECTED} The attempt to change
    *   the room's property failed because the player's session is not connected
    *   to the service.</li>
@@ -223,46 +236,12 @@ public interface RoomListener {
    * <br>
    * This callback is called on the main thread.
    *
-   * @see Session#setRoomProperty(String, Object)
+   * @see Session#setRoomProperty
    *
    * @param status_code A status code indication the result of the operation.
    * @param room The room.
-   * @param participant_id The participant's ID that performs the operation.
    * @param key The property key that was changed.
+   *
    */
-  public void onRoomPropertyChanged(int status_code, Room room,
-                                    String participant_id, String key);
-
-  /**
-   * This method is called when a property of a participant change. This is done
-   * by calling {@link Session#setCurrentParticipantProperty(String,
-   * Object)}. If the operation succeed, all participants will be notified. But,
-   * he will be the only one notified when an error occurred.
-   * <br>
-   * Possible status codes are:
-   *
-   * <ul>
-   *   <li>{@link Session#STATUS_SUCCESS} The participant's property has
-   *   changed.</li>
-   *   <li>{@link Session#STATUS_SESSION_NOT_CONNECTED} The attempt to change
-   *   the participant's property failed because the player's session is not
-   *   connected to the service.</li>
-   *   <li>{@link Session#STATUS_NETWORK_ERROR} The attempt to change the
-   *   participant's property failed due to a network error.</li>
-   *   <li>{@link Session#STATUS_ROOM_NOT_JOINED} The attempt to change the
-   *   participant's property failed because the player is not a room's
-   *   participant.</li>
-   * </ul>
-   * <br>
-   * This callback is called on the main thread.
-   *
-   * @see Session#setCurrentParticipantProperty(String, Object)
-   *
-   * @param status_code A status code indication the result of the operation.
-   * @param room The room.
-   * @param participant_id The participant's ID that performs the operation.
-   * @param key The property key that was changed.
-   */
-  public void onParticipantPropertyChanged(int status_code, Room room,
-                                           String participant_id, String key);
+  public void onSetRoomPropertyFailed(int status_code, Room room, String key);
 }

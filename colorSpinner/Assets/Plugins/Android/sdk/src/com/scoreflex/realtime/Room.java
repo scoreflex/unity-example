@@ -20,30 +20,30 @@
 package com.scoreflex.realtime;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Collections;
 
 /**
  * A realtime room with its configuration, properties and participants. Such
- * rooms can be created by calling {@link Session#createRoom(String, RoomConfig,
- * Map, Map)}.
+ * rooms can be created by calling {@link Session#createRoom}.
  */
 public class Room {
   private final String                   id;
   private final Session                  session;
   private       MatchState               state;
-  private       Map<String, Object>      config;
-  private       Map<String, Object>      properties;
+  private       RealtimeMap              config;
+  private       RealtimeMap              properties;
   private       Map<String, Participant> participants;
-  private final Map<String, Object>      configView;
-  private final Map<String, Object>      propertiesView;
+  private final RealtimeMap              configView;
+  private final RealtimeMap              propertiesView;
   private final Map<String, Participant> participantsView;
 
   protected static class Builder {
     private String                   id;
     private Session                  session;
     private MatchState                state;
-    private Map<String, Object>      config;
-    private Map<String, Object>      properties;
+    private RealtimeMap      config;
+    private RealtimeMap      properties;
     private Map<String, Participant> participants;
 
     protected Builder() {
@@ -64,12 +64,12 @@ public class Room {
       return this;
     }
 
-    protected Builder setConfig(Map<String, Object> config) {
+    protected Builder setConfig(RealtimeMap config) {
       this.config = config;
       return this;
     }
 
-    protected Builder setProperties(Map<String, Object> properties) {
+    protected Builder setProperties(RealtimeMap properties) {
       this.properties = properties;
       return this;
     }
@@ -95,8 +95,8 @@ public class Room {
     this.config           = builder.config;
     this.properties       = builder.properties;
     this.participants     = builder.participants;
-    this.configView       = Collections.unmodifiableMap(this.config);
-    this.propertiesView   = Collections.unmodifiableMap(this.properties);
+    this.configView       = RealtimeMap.unmodifiableRealtimeMap(this.config);
+    this.propertiesView   = RealtimeMap.unmodifiableRealtimeMap(this.properties);
     this.participantsView = Collections.unmodifiableMap(this.participants);
   }
 
@@ -114,7 +114,7 @@ public class Room {
    *
    * @return The room's configuration.
    */
-  public Map<String, Object> getConfig() {
+  public RealtimeMap getConfig() {
     return configView;
   }
 
@@ -134,7 +134,7 @@ public class Room {
    *
    * @return The room's properties.
    */
-  public Map<String, Object> getProperties() {
+  public RealtimeMap getProperties() {
     return propertiesView;
   }
 
@@ -184,36 +184,25 @@ public class Room {
     return id.equals(id);
   }
 
-  protected void addParticipant(Participant p) {
-    participants.put(p.getId(), p);
+  protected Participant addParticipant(Participant p) {
+    return participants.put(p.getId(), p);
   }
 
-  protected void removeParticipant(String id) {
-    participants.remove(id);
+  protected Participant removeParticipant(String id) {
+    return participants.remove(id);
   }
 
-  protected void setMatchState(MatchState state) {
+  protected MatchState setMatchState(MatchState state) {
+    MatchState oldState = this.state;
     this.state = state;
+    return oldState;
   }
 
-  protected void addProperty(String key, Object value) {
-    properties.put(key, value);
+  protected Object addProperty(String key, Object value) {
+    return properties.put(key, value);
   }
 
-  protected void removeProperty(String key) {
-    properties.remove(key);
+  protected Object removeProperty(String key) {
+    return properties.remove(key);
   }
-
-  protected void addParticipantProperty(String id, String key, Object value) {
-    Participant participant = participants.get(id);
-    if (participant != null)
-      participant.addProperty(key, value);
-  }
-
-  protected void removeParticipantProperty(String id, String key) {
-    Participant participant = participants.get(id);
-    if (participant != null)
-      participant.removeProperty(key);
-  }
-
 }

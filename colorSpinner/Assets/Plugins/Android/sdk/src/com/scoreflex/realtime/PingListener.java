@@ -19,8 +19,6 @@
 
 package com.scoreflex.realtime;
 
-import java.util.Map;
-
 /**
  * An interface that contains callbacks used by the {@link Session realtime
  * session} in reply to a Ping request.
@@ -32,7 +30,7 @@ public interface PingListener {
    * <br>
    * This callback is called on the main thread.
    *
-   * @see Session#ping(PingListener, int)
+   * @see Session#ping
    *
    * @param latency The latency in milliseconds to receive the ping reply.
    */
@@ -43,7 +41,7 @@ public interface PingListener {
    * <br>
    * This callback is called on the main thread.
    *
-   * @see Session#ping(PingListener, int)
+   * @see Session#ping
    */
   public void onPang();
 }
