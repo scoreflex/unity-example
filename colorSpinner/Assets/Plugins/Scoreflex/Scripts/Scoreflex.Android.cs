@@ -88,7 +88,7 @@ public partial class Scoreflex
 
 		var parsedResponse = PullFiguresFromResponse(response);
 
-		callback(boolean, parsedResponse);
+		if(callback != null) callback(boolean, parsedResponse);
 	}
 
 	void ProcessChallengeBroadcast(Dictionary<string,object> figures)
@@ -193,7 +193,13 @@ public partial class Scoreflex
 		{
 			foreach(var pendingOperation in PendingOperations)
 			{
-				pendingOperation.method(pendingOperation.figures);
+				try {
+					pendingOperation.method(pendingOperation.figures);
+				}
+				catch(System.Exception ex)
+				{
+					Debug.LogException(ex);
+				}
 			}
 			PendingOperations.Clear();
 		}
@@ -259,10 +265,13 @@ public partial class Scoreflex
 
 		AndroidJavaObject map = new AndroidJavaObject("java.util.HashMap");
 		if(source != null)
+		{
 			foreach(KeyValuePair<string,object> kvp in source)
 			{
-				mapAssist.CallStatic("put", map, kvp.Key, kvp.Value.ToString());
+				var value = kvp.Value == null ? null : kvp.Value.ToString();
+				mapAssist.CallStatic("put", map, kvp.Key, value);
 			}
+		}
 		if(score.HasValue)
 		{
 			mapAssist.CallStatic("put", map, "score", score.Value.ToString());

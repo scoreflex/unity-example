@@ -37,6 +37,7 @@ public class ChallengeHandler : MonoBehaviour
 		Debug.Log("Accepting challenge: " + sb.ToString());
 		
 		turnSequence = turnFigures["sequence"] as string;
+		Debug.Log("Turn sequence: " + turnFigures["sequence"]);
 	}
 
 	void OnDestroy()

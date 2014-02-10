@@ -52,7 +52,7 @@ public static class GameStateController
 			else
 			{
 				var param = new Dictionary<string,object>();
-				param["turnSequence"] = ChallengeHandler.turnSequence as object;
+				if(ChallengeHandler.turnSequence != null) param["turnSequence"] = (object) ChallengeHandler.turnSequence;
 
 				Scoreflex.Instance.SubmitTurnAndShowChallengeDetail(State.challengeId, State.hits, param);
 				Scoreflex.Instance.SubmitScore(LeaderboardID, State.hits);
