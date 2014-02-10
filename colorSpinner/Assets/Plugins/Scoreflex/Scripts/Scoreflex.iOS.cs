@@ -47,20 +47,6 @@ public partial class Scoreflex
 		return key;
 	}
 	
-	void EnqueueCallbackByKey(string handlerKey, bool success, Dictionary<string,object> dictionary)
-	{
-		if(CallbackTable.ContainsKey(handlerKey))
-		{
-			EnqueueCallback(CallbackTable[handlerKey], success, dictionary);
-			
-			CallbackTable.Remove(handlerKey);
-		}
-		else
-		{
-			Debug.Log("Scoreflex: Received invalid callback code from native library: " + handlerKey);
-		}
-	}
-	
 	void HandleCallback(string figure)
 	{
 		if(figure.Contains(":"))
@@ -83,11 +69,20 @@ public partial class Scoreflex
 					}
 				}
 			}
-			catch(System.Exception ex)
+			catch(System.Exception)
 			{
 				Debug.LogError("Scoreflex: Received unparsable JSON code: " + figure);
 			}
-			EnqueueCallbackByKey(handlerKey, success, dictionary);
+
+			if(CallbackTable.ContainsKey(handlerKey))
+			{
+				CallbackTable[handlerKey](success, dictionary);
+				CallbackTable.Remove(handlerKey);
+			}
+			else
+			{
+				Debug.Log("Scoreflex: Received invalid callback code from native library: " + handlerKey);
+			}
 		}
 		else
 		{
