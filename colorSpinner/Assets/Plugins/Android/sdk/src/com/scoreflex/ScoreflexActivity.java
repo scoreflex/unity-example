@@ -36,7 +36,7 @@ public class ScoreflexActivity extends Activity {
 	public final static String INTENT_EXTRA_SHOW_SEARCH = "search";
 	public final static String INTENT_EXTRA_SHOW_ABSTRACT_URL = "abstractUrl";
 	public final static String INTENT_EXTRA_ABSTRACT_URL = "url";
-	
+
 
 
 	protected String getPlayerId(Intent intent) {
@@ -142,30 +142,30 @@ public class ScoreflexActivity extends Activity {
 	  			sfxView = Scoreflex.showFullScreenView(this, resource, params);
 	  		}
 	  	}
-	  	if (action.equals(INTENT_EXTRA_SHOW_ABSTRACT_URL)) { 
+	  	if (action.equals(INTENT_EXTRA_SHOW_ABSTRACT_URL)) {
 	  		String url = startIntent.getStringExtra(INTENT_EXTRA_ABSTRACT_URL);
-	  		if (url != null) { 
+	  		if (url != null) {
 	  			sfxView = Scoreflex.showFullScreenView(this, url);
 	  		}
 	  	}
-	  	if (sfxView != null) { 
+	  	if (sfxView != null) {
 	  		sfxView.setScoreflexViewListener(new ScoreflexViewListener() {
-	  			
+
 					@Override
 					public void onViewClosed() {
-						ScoreflexActivity.this.finish();						
+						ScoreflexActivity.this.finish();
 					}
 
 					@Override
 					public boolean handleOpenNewFullscreenView(
 							String fullUrlString) {
 						return false;
-					} 
+					}
 	  		});
 	  	}
 	  }
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int responseCode,
 			Intent intent) {
@@ -184,7 +184,7 @@ public class ScoreflexActivity extends Activity {
 		super.onPause();
 		Scoreflex.unregisterNetworkReceiver(this);
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();

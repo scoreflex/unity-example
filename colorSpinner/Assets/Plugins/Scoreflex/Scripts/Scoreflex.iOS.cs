@@ -31,97 +31,9 @@ public partial class Scoreflex
 			GameObject.Destroy(gameObject);
 		}
 	}
-	
-	private readonly Dictionary<string,Callback> CallbackTable = new Dictionary<string,Callback>();
-	
-	string RegisterCallback(Callback callback)
-	{
-		string key;
-		var random = new System.Random();
-		do {
-			key = random.Next().ToString();
-		} while(CallbackTable.ContainsKey(key));
-		
-		CallbackTable[key] = callback;
-		
-		return key;
-	}
-	
-	void HandleCallback(string figure)
-	{
-		if(figure.Contains(":"))
-		{
-			bool success = figure.Contains("success");
-			string handlerKey = figure.Split(':')[0];
-			string jsonString = figure.Substring(handlerKey.Length + ":success:".Length); // :failure is the same length
-			
-			var dictionary = new Dictionary<string,object>();
-			
-			try
-			{
-				if(jsonString.Length > 0)
-				{
-					var parsed = MiniJSON.Json.Deserialize(jsonString) as Dictionary<string,object>;
-					
-					foreach(var kvp in parsed)
-					{
-						dictionary.Add(kvp.Key, kvp.Value);
-					}
-				}
-			}
-			catch(System.Exception)
-			{
-				Debug.LogError("Scoreflex: Received unparsable JSON code: " + figure);
-			}
 
-			if(CallbackTable.ContainsKey(handlerKey))
-			{
-				CallbackTable[handlerKey](success, dictionary);
-				CallbackTable.Remove(handlerKey);
-			}
-			else
-			{
-				Debug.Log("Scoreflex: Received invalid callback code from native library: " + handlerKey);
-			}
-		}
-		else
-		{
-			Debug.Log("Scoreflex: Received invalid callback code from native library: " + figure);
-		}
-	}
-
-	void HandlePlaySolo(string figure)
+	public string _GetPlayerId()
 	{
-		if(PlaySoloHandlers == null)
-		{
-			Debug.LogError("Scoreflex: Instructed to play solo, but no handlers configured! Please assign to Scoreflex.Instance.PlaySoloHandlers");
-		}
-		else
-		{
-			PlaySoloHandlers(figure);
-		}
-	}
-
-	void HandleChallenge(string figure)
-	{
-		if(ChallengeHandlers == null)
-		{
-			Debug.LogError("Scoreflex: Received challenge, but found no challenge handler! Please assign to Scoreflex.Instance.ChallengeHandlers");
-		}
-		else
-		{
-			var dict = MiniJSON.Json.Deserialize(figure) as Dictionary<string,object>;
-			ChallengeHandlers(dict);
-		}
-	}
-
-	public string GetPlayerId()
-	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return string.Empty;
-		}
-
 		var buffer = new byte[512];
 		scoreflexGetPlayerId(buffer, buffer.Length);
 		int stringLength = 0;
@@ -130,35 +42,20 @@ public partial class Scoreflex
 		return result;
 	}
 
-	public float GetPlayingTime()
+	public float _GetPlayingTime()
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return 0f;
-		}
-
 		return scoreflexGetPlayingTime();
 	}
 
-	public void ShowFullscreenView(string resource, Dictionary<string,object> parameters = null)
+	public void _ShowFullscreenView(string resource, Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowFullscreenView(resource, json);
 	}
 
-	public View ShowPanelView(string resource, Dictionary<string,object> parameters = null, Gravity gravity = Gravity.Top)
+	public View _ShowPanelView(string resource, Dictionary<string,object> parameters = null, Gravity gravity = Gravity.Top)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return null;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		int handle = scoreflexShowPanelView(resource, json, (int) gravity);
@@ -166,234 +63,133 @@ public partial class Scoreflex
 		return new View(handle);
 	}
 
-	public void SetDeviceToken(string deviceToken)
+	public void _SetDeviceToken(string deviceToken)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		scoreflexSetDeviceToken(deviceToken);
 	}
 
-	public void ShowDeveloperGames(string developerId, Dictionary<string,object> parameters = null)
+	public void _ShowDeveloperGames(string developerId, Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowDeveloperGames(developerId, json);
 	}
 
-	public void ShowDeveloperProfile(string developerId, Dictionary<string,object> parameters = null)
+	public void _ShowDeveloperProfile(string developerId, Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowDeveloperProfile(developerId, json);
 	}
 
-	public void ShowGameDetails(string gameId, Dictionary<string,object> parameters = null)
+	public void _ShowGameDetails(string gameId, Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowGameDetails(gameId, json);
 	}
 
-	public void ShowGamePlayers(string gameId, Dictionary<string,object> parameters = null)
+	public void _ShowGamePlayers(string gameId, Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowGamePlayers(gameId, json);
 	}
 
-	public void ShowLeaderboard(string leaderboardId, Dictionary<string,object> parameters = null)
+	public void _ShowLeaderboard(string leaderboardId, Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowLeaderboard(leaderboardId, json);
 	}
 
-	public void ShowLeaderboardOverview(string leaderboardId, Dictionary<string,object> parameters = null)
+	public void _ShowLeaderboardOverview(string leaderboardId, Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowLeaderboardOverview(leaderboardId, json);
 	}
 
-	public void ShowPlayerChallenges(Dictionary<string,object> parameters = null)
+	public void _ShowPlayerChallenges(Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowPlayerChallenges(json);
 	}
 
-	public void ShowPlayerFriends(string playerId = null, Dictionary<string,object> parameters = null)
+	public void _ShowPlayerFriends(string playerId = null, Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowPlayerFriends(playerId, json);
 	}
 
-	public void ShowPlayerNewsFeed(Dictionary<string,object> parameters = null)
+	public void _ShowPlayerNewsFeed(Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowPlayerNewsFeed(json);
 	}
 
-	public void ShowPlayerProfile(string playerId = null, Dictionary<string,object> parameters = null)
+	public void _ShowPlayerProfile(string playerId = null, Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
-		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
+		var json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowPlayerProfile(playerId, json);
 	}
 
-	public void ShowPlayerProfileEdit(Dictionary<string,object> parameters = null)
+	public void _ShowPlayerProfileEdit(Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowPlayerProfileEdit(json);
 	}
 
-	public void ShowPlayerRating(Dictionary<string,object> parameters = null)
+	public void _ShowPlayerRating(Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowPlayerRating(json);
 	}
 
-	public void ShowPlayerSettings(Dictionary<string,object> parameters = null)
+	public void _ShowPlayerSettings(Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowPlayerSettings(json);
 	}
 
-	public void ShowRanksPanel(string leaderboardId, long score, Dictionary<string,object> parameters = null, Gravity gravity = Gravity.Top)
+	public void _ShowRanksPanel(string leaderboardId, long score, Dictionary<string,object> parameters = null, Gravity gravity = Gravity.Top)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowRanksPanel(leaderboardId, score, json, (int) gravity);
 	}
 
-	public void HideRanksPanel()
+	public void _HideRanksPanel()
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		scoreflexHideRanksPanel();
 	}
 
-	public void ShowSearch(Dictionary<string,object> parameters = null)
+	public void _ShowSearch(Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexShowSearch(json);
 	}
 
-	public void StartPlayingSession()
+	public void _StartPlayingSession()
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		scoreflexStartPlayingSession();
 	}
 
-	public void StopPlayingSession()
+	public void _StopPlayingSession()
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		scoreflexStopPlayingSession();
 	}
 
-	public void Get(string resource, Dictionary<string,object> parameters, Callback callback)
+	public void _Get(string resource, Dictionary<string,object> parameters, Callback callback)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			if(callback != null) callback(false, new Dictionary<string,object>());
-			return;
-		}
-
 		string handlerKey = callback == null ? null : RegisterCallback(callback);
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
@@ -401,14 +197,8 @@ public partial class Scoreflex
 		scoreflexGet(resource, json, handlerKey);
 	}
 
-	public void Put(string resource, Dictionary<string,object> parameters, Callback callback)
+	public void _Put(string resource, Dictionary<string,object> parameters, Callback callback)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			if(callback != null) callback(false, new Dictionary<string,object>());
-			return;
-		}
-		
 		string handlerKey = callback == null ? null : RegisterCallback(callback);
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
@@ -416,14 +206,8 @@ public partial class Scoreflex
 		scoreflexPut(resource, json, handlerKey);
 	}
 	
-	public void Post(string resource, Dictionary<string,object> parameters, Callback callback)
+	public void _Post(string resource, Dictionary<string,object> parameters, Callback callback)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			if(callback != null) callback(false, new Dictionary<string,object>());
-			return;
-		}
-		
 		string handlerKey = callback == null ? null : RegisterCallback(callback);
 		
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
@@ -431,14 +215,8 @@ public partial class Scoreflex
 		scoreflexPost(resource, json, handlerKey);
 	}
 
-	public void PostEventually(string resource, Dictionary<string,object> parameters, Callback callback)
+	public void _PostEventually(string resource, Dictionary<string,object> parameters, Callback callback)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			if(callback != null) callback(false, new Dictionary<string,object>());
-			return;
-		}
-		
 		string handlerKey = callback == null ? null : RegisterCallback(callback);
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
@@ -446,14 +224,8 @@ public partial class Scoreflex
 		scoreflexPostEventually(resource, json, handlerKey);
 	}
 
-	public void Delete(string resource, Dictionary<string,object> parameters, Callback callback)
+	public void _Delete(string resource, Dictionary<string,object> parameters, Callback callback)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			if(callback != null) callback(false, new Dictionary<string,object>());
-			return;
-		}
-		
 		string handlerKey = callback == null ? null : RegisterCallback(callback);
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
@@ -461,14 +233,8 @@ public partial class Scoreflex
 		scoreflexDelete(resource, json, handlerKey);
 	}
 
-	public void SubmitTurn(string challengeInstanceId, long score, Dictionary<string,object> parameters = null, Callback callback = null)
+	public void _SubmitTurn(string challengeInstanceId, long score, Dictionary<string,object> parameters = null, Callback callback = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			if(callback != null) callback(false, new Dictionary<string,object>());
-			return;
-		}
-		
 		string handlerKey = callback == null ? null : RegisterCallback(callback);
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
@@ -476,14 +242,8 @@ public partial class Scoreflex
 		scoreflexSubmitTurn(challengeInstanceId, score, json, handlerKey);
 	}
 
-	public void SubmitScore(string leaderboardId, long score, Dictionary<string,object> parameters = null, Callback callback = null)
+	public void _SubmitScore(string leaderboardId, long score, Dictionary<string,object> parameters = null, Callback callback = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			if(callback != null) callback(false, new Dictionary<string,object>());
-			return;
-		}
-		
 		string handlerKey = callback == null ? null : RegisterCallback(callback);
 
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
@@ -491,25 +251,15 @@ public partial class Scoreflex
 		scoreflexSubmitScore(leaderboardId, score, json, handlerKey);
 	}
 
-	public void SubmitScoreAndShowRanksPanel(string leaderboardId, long score, Dictionary<string,object> parameters = null, Gravity gravity = Gravity.Top)
+	public void _SubmitScoreAndShowRanksPanel(string leaderboardId, long score, Dictionary<string,object> parameters = null, Gravity gravity = Gravity.Top)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexSubmitScoreAndShowRanksPanel(leaderboardId, score, json, (int) gravity);
 	}
 
-	public void SubmitTurnAndShowChallengeDetail(string challengeLeaderboardId, long score, Dictionary<string,object> parameters = null)
+	public void _SubmitTurnAndShowChallengeDetail(string challengeLeaderboardId, long score, Dictionary<string,object> parameters = null)
 	{
-		if(!Live) {
-			Debug.Log(ErrorNotLive);
-			return;
-		}
-
 		string json = parameters == null ? null : MiniJSON.Json.Serialize(parameters);
 
 		scoreflexSubmitTurnAndShowChallengeDetail(challengeLeaderboardId, score, json);

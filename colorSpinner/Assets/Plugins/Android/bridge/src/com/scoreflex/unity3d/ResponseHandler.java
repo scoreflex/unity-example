@@ -4,21 +4,28 @@ import com.scoreflex.Scoreflex.Response;
 
 public class ResponseHandler extends com.scoreflex.Scoreflex.ResponseHandler {
 
-	private IResponseHandler handler;
+	final String callbackKey;
 	
-	public ResponseHandler(IResponseHandler handler)
+	public ResponseHandler(final String callbackKey)
 	{
-		this.handler = handler;
+		this.callbackKey = callbackKey;
+	}
+	
+	private void onWhatever(boolean success, Response response) {
+		String jsonString = response.getJSONObject().toString();
+		String bool = success ? "success" : "failure";
+		String message = callbackKey + ":" + bool + ":" + jsonString;
+		Helper.sendMessage("HandleCallback", message);
 	}
 	
 	@Override
 	public void onFailure(Throwable e, Response errorResponse) {
-		handler.onFailure(errorResponse);
+		onWhatever(false, errorResponse);
 	}
 
 	@Override
 	public void onSuccess(Response response) {
-		handler.onSuccess(response);
+		onWhatever(true, response);
 	}
 
 }
