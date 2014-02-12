@@ -36,6 +36,7 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -1902,6 +1903,19 @@ public class Scoreflex {
 		}
 	}
 
+
+	protected static void showView(Activity activity, String resource, Scoreflex.RequestParams params, boolean useActivityForViews) {
+		if (useActivityForViews) { 
+			Intent intent = new Intent(activity, ScoreflexActivity.class);
+			intent.putExtra(ScoreflexActivity.INTENT_SHOW_EXTRA_KEY, ScoreflexActivity.INTENT_EXTRA_SHOW_FULLSCREEN_VIEW);
+			intent.putExtra(ScoreflexActivity.INTENT_EXTRA_FULLSCREEN_RESOURCE, resource);
+			intent.putExtra(ScoreflexActivity.INTENT_EXTRA_REQUEST_PARAMS_KEY, params);
+			activity.startActivity(intent);
+		} else { 
+			showFullScreenView(activity,resource, params);
+		}
+	}
+
 	/**
 	 * Method to call on your onCreate method to handle the Scoreflex
 	 * notification, it must be added to the Activity implementation of the
@@ -1921,9 +1935,12 @@ public class Scoreflex {
 	 *            The current activity.
 	 * @param intent
 	 *            The intent the activity received.
+	 * @param useActivityForViews
+	 * 			  Set if scoreflex views should be presented as separate activities
+	 * 
 	 * @return <code>true</code> if handled, <code>false</code> otherwise.
 	 */
-	public static boolean onCreateMainActivity(Activity activity, Intent intent) {
+	public static boolean onCreateMainActivity(final Activity activity, Intent intent, final boolean useActivityForViews) {
 		if (intent.hasExtra(Scoreflex.NOTIFICATION_EXTRA_KEY)) {
 			String notificationString = intent
 					.getStringExtra(Scoreflex.NOTIFICATION_EXTRA_KEY);
@@ -1931,25 +1948,39 @@ public class Scoreflex {
 			try {
 				JSONObject notification = new JSONObject(notificationString);
 				JSONObject data = notification.getJSONObject("data");
+				String resource = null; 
+				Scoreflex.RequestParams parameters = null;
 				int code = notification.getInt("code");
 				if (NOTIFICATION_TYPE_CHALLENGE_INVITATION == code
 						|| NOTIFICATION_TYPE_YOUR_TURN_IN_CHALLENGE == code
 						|| NOTIFICATION_TYPE_CHALLENGE_ENDED == code) {
-					showFullScreenView(activity, "/web/challenges/instances/"
-							+ data.getString("challengeInstanceId"), null);
+					resource = "/web/challenges/instances/"+ data.getString("challengeInstanceId");
 				} else if (NOTIFICATION_TYPE_FRIEND_JOINED_GAME == code) {
-					showFullScreenView(activity,
-							"/web/players/" + data.getString("friendId"), null);
+					resource = "/web/players/" + data.getString("friendId");
 				} else if (NOTIFICATION_TYPE_FRIEND_BEAT_YOUR_HIGHSCORE == code) {
-					Scoreflex.RequestParams params = new RequestParams();
-					params.put("friendsOnly", "true");
-					params.put("focus", data.getString("friendId"));
-					showFullScreenView(
-							activity,
-							"/web/leaderboards/"
-									+ data.getString("leaderboardId"), params);
+					parameters = new RequestParams();
+					parameters.put("friendsOnly", "true");
+					parameters.put("focus", data.getString("friendId"));
+					resource = "/web/leaderboards/" + data.getString("leaderboardId");
 				} else if (NOTIFICATION_TYPE_PLAYER_LEVEL_CHANGED == code) {
-					showFullScreenView(activity, "/web/players/me", null);
+					resource = "/web/players/me";
+				}
+				if (isInitialized()) { 
+					showView(activity, resource, parameters, useActivityForViews);
+				} else { 
+					final String finalResource = resource;
+					final Scoreflex.RequestParams params = parameters;
+					BroadcastReceiver receiver = new BroadcastReceiver() {
+
+						@Override
+						public void onReceive(Context context, Intent intent) {
+							showView(activity, finalResource, params, useActivityForViews);
+							LocalBroadcastManager.getInstance(activity).unregisterReceiver(this);
+						}
+					};
+
+					IntentFilter filter = new IntentFilter(Scoreflex.INTENT_SCOREFLEX_INTIALIZED);
+					LocalBroadcastManager.getInstance(activity).registerReceiver(receiver, filter);
 				}
 				return true;
 			} catch (JSONException e) {
@@ -1957,6 +1988,32 @@ public class Scoreflex {
 			}
 
 		}
+		return false;
+	}
+	
+	/**
+	 * Method to call on your onCreate method to handle the Scoreflex
+	 * notification, it must be added to the Activity implementation of the
+	 * class you gave to
+	 * {@link #onBroadcastReceived(Context, Intent, int, Class)} (must be called
+	 * after Scoreflex.initialize(). As follow:
+	 * 
+	 * <pre>
+	 * <code>
+	 * protected void onCreate(Bundle savedInstance) {
+	 * 	Scoreflex.onCreateMainActivity(this, getIntent());
+	 * }
+	 * </code>
+	 * </pre>
+	 * 
+	 * @param activity
+	 *            The current activity.
+	 * @param intent
+	 *            The intent the activity received.
+	 * @return <code>true</code> if handled, <code>false</code> otherwise.
+	 */
+	public static boolean onCreateMainActivity(Activity activity, Intent intent) {
+		onCreateMainActivity(activity, intent, false);
 		return false;
 	}
 

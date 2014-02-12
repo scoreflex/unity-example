@@ -1,5 +1,5 @@
 <resources>
 
     <string name="app_name">ScoreflexUnityBridge</string>
-
+	<string name="push_sender_id">191777458062</string>
 </resources>

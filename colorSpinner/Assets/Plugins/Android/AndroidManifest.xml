@@ -17,7 +17,11 @@
 		android:icon="@drawable/app_icon"
         android:label="@string/app_name"
         android:debuggable="true">
+<<<<<<< HEAD
         <activity android:name="com.unity3d.player.UnityPlayerNativeActivity"
+=======
+        <activity android:name="com.scoreflex.unity3d.ScoreflexUnityActivity"
+>>>>>>> Added push notification support for Android
                   android:launchMode="singleTask"
                   android:label="@string/app_name"
                   android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen">
@@ -28,9 +32,32 @@
             </intent-filter>
         </activity>
     
+<<<<<<< HEAD
 			<activity android:name="com.scoreflex.ScoreflexActivity" android:configChanges="orientation"></activity>
+=======
+		<activity android:name="com.scoreflex.ScoreflexActivity" android:configChanges="orientation"></activity>
+		
+		<receiver android:name="com.scoreflex.ScoreflexBroadcastReceiver"
+        		  android:permission="com.google.android.c2dm.permission.SEND">
+
+    		<meta-data android:name="notificationIcon" android:resource="@drawable/app_icon" />
+    		<meta-data android:name="activityName" android:value="com.scoreflex.unity3d.ScoreflexUnityActivity" />
+
+    		<intent-filter>
+	        	<action android:name="com.google.android.c2dm.intent.RECEIVE" />
+    		    <category android:name="com.unity3d.player" />
+    		</intent-filter>
+
+		</receiver>
+		<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+		<meta-data android:name="com.scoreflex.push.SenderId"
+        android:value="@string/push_sender_id" />
+>>>>>>> Added push notification support for Android
 	</application>
 
+	<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.INTERNET"/>
-
+	<permission android:name="com.unity3d.player.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+	<uses-permission android:name="com.unity3d.player.permission.C2D_MESSAGE" />
 </manifest>

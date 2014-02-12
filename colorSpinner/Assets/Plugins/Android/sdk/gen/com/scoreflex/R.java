@@ -67,6 +67,7 @@ containing a value of this type.
         public static int SCOREFLEX_ERROR_SECURE_CONNECTION_REQUIRED=0x7f070003;
         public static int SCOREFLEX_ERROR_SERVICE_EXCEPTION=0x7f07000d;
         public static int app_name=0x7f070000;
+        public static int push_sender_id=0x7f070011;
         public static int scoreflex_cancel=0x7f07000e;
         public static int scoreflex_network_error=0x7f070010;
         public static int scoreflex_retry=0x7f07000f;

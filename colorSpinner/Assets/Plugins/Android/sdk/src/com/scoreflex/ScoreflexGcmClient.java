@@ -159,13 +159,14 @@ public class ScoreflexGcmClient {
      }
 
      try {
-
     	JSONObject customData = new JSONObject(customDataJson);
         JSONObject data = customData.getJSONObject(SCOREFLEX_NOTIFICATION_EXTRA_KEY);
+        JSONObject sfxData = data.optJSONObject("data");
+
 			if (data.getInt("code") < Scoreflex.NOTIFICATION_TYPE_CHALLENGE_INVITATION) {
 				return false;
 			}
-			String targetPlayerId = data.optString("targetPlayerId");
+			String targetPlayerId = sfxData.optString("targetPlayerId");
 			String loggedPlayerId = ScoreflexRestClient.getPlayerId(context);
 
 			if (!targetPlayerId.equals(loggedPlayerId)) {

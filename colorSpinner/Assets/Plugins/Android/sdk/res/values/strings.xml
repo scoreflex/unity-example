@@ -18,4 +18,5 @@
     <string name="scoreflex_cancel">Cancel</string>
     <string name="scoreflex_retry">Retry</string>
     <string name="scoreflex_network_error">Could not load this page, please check your Internet connectivity.</string>
+    <string name="push_sender_id">191777458062</string>
 </resources>

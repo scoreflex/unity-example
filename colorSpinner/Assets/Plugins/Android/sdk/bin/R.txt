@@ -35,6 +35,7 @@ int string SCOREFLEX_ERROR_SANDBOX_URL_REQUIRED 0x7f070006
 int string SCOREFLEX_ERROR_SECURE_CONNECTION_REQUIRED 0x7f070003
 int string SCOREFLEX_ERROR_SERVICE_EXCEPTION 0x7f07000d
 int string app_name 0x7f070000
+int string push_sender_id 0x7f070011
 int string scoreflex_cancel 0x7f07000e
 int string scoreflex_network_error 0x7f070010
 int string scoreflex_retry 0x7f07000f
