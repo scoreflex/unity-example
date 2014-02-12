@@ -37,28 +37,8 @@ public partial class Scoreflex
 				var unityActivity = UnityActivity;
 
 				ScoreflexClass.CallStatic("initialize", unityActivity, ClientId, ClientSecret, Sandbox);
-
-<<<<<<< HEAD
 				Helper.CallStatic("setupBroadcastReceivers", unityActivity);
 
-=======
-				AndroidJavaClass localBroadcastManagerClass = new AndroidJavaClass("android.support.v4.content.LocalBroadcastManager");
-				var localBroadcastManager = localBroadcastManagerClass.CallStatic<AndroidJavaObject>("getInstance", unityActivity);
-
-				var challengeBroadcastReceiver = new ChallengeBroadcastReceiver(this);
-				var challengeBroadcastReceiverBridge = new AndroidJavaObject("com.scoreflex.unity3d.BroadcastReceiver", challengeBroadcastReceiver);
-				var INTENT_START_CHALLENGE_ID = AndroidJNI.GetStaticFieldID(scoreflex.GetRawClass(), "INTENT_START_CHALLENGE", "Ljava/lang/String;");
-				string INTENT_START_CHALLENGE = AndroidJNI.GetStaticStringField(scoreflex.GetRawClass(), INTENT_START_CHALLENGE_ID);
-				AndroidJavaObject challengeIntentFilter = new AndroidJavaObject("android.content.IntentFilter", INTENT_START_CHALLENGE);
-				localBroadcastManager.Call("registerReceiver", challengeBroadcastReceiverBridge, challengeIntentFilter);
-
-				var playSoloBroadcastReceiver = new PlaySoloBroadcastReceiver(this);
-				var playSoloBroadcastReceiverBridge = new AndroidJavaObject("com.scoreflex.unity3d.BroadcastReceiver", playSoloBroadcastReceiver);
-				var INTENT_PLAY_LEVEL_ID = AndroidJNI.GetStaticFieldID(scoreflex.GetRawClass(), "INTENT_PLAY_LEVEL", "Ljava/lang/String;");
-				string INTENT_PLAY_LEVEL = AndroidJNI.GetStaticStringField(scoreflex.GetRawClass(), INTENT_PLAY_LEVEL_ID);
-				AndroidJavaObject playSoloIntentFilter = new AndroidJavaObject("android.content.IntentFilter", INTENT_PLAY_LEVEL);
-				localBroadcastManager.Call("registerReceiver", playSoloBroadcastReceiverBridge, playSoloIntentFilter);
->>>>>>> Added push notification support for Android
 				initialized = true;
 				registerForPushNotification();
 			}
@@ -191,17 +171,14 @@ public partial class Scoreflex
 
 	//private readonly Dictionary<int,AndroidJavaObject> scoreflexViewByHandle = new Dictionary<int,AndroidJavaObject>();
 
-<<<<<<< HEAD
-	public View _ShowPanelView(string resource, Dictionary<string,object> parameters = null, Gravity gravity = Gravity.Top)
-=======
+
 
 	public void registerForPushNotification()
 	{
-		scoreflex.CallStatic("registerForPushNotification", unityActivity);
+		ScoreflexClass.CallStatic("registerForPushNotification", UnityActivity);
 	}
 	
-	public View ShowPanelView(string resource, Dictionary<string,object> parameters = null, Gravity gravity = Gravity.Top)
->>>>>>> Added push notification support for Android
+	public View _ShowPanelView(string resource, Dictionary<string,object> parameters = null, Gravity gravity = Gravity.Top)
 	{
 		throw new System.NotImplementedException();
 
