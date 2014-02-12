@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class Menu : MonoBehaviour
 {
@@ -14,7 +14,7 @@ public class Menu : MonoBehaviour
 	{
 		if(skin != null) GUI.skin = skin;
 
-		Rect guiArea = new Rect { width = 256, height = 256 };
+		Rect guiArea = new Rect { width = 256, height = 300 };
 
 		if(GameStateController.IsSessionInProgress && !GameStateController.IsPaused)
 		{
@@ -42,25 +42,26 @@ public class Menu : MonoBehaviour
 				GameStateController.IsPaused = !GameStateController.IsPaused;
 			}
 		}
-		if(Scoreflex.Instance.Live && (!GameStateController.IsSessionInProgress || GameStateController.IsPaused))
+		if(Scoreflex.Live && (!GameStateController.IsSessionInProgress || GameStateController.IsPaused))
 		{
 			if(GUILayout.Button("Scoreflex"))
 			{
-				Scoreflex.Instance.ShowPlayerProfile();
+				Scoreflex.ShowPlayerProfile();
 			}
 			if(GUILayout.Button("Leaderboards"))
 			{
-				Scoreflex.Instance.ShowLeaderboard(GameStateController.LeaderboardID);
+				Scoreflex.ShowLeaderboard(GameStateController.LeaderboardID);
 			}
 			if(GUILayout.Button("Play with friends"))
 			{
-				Scoreflex.Instance.ShowPlayerChallenges();
+				Scoreflex.ShowPlayerChallenges();
 			}
 			if(GUILayout.Button("More Games..."))
 			{
-				Scoreflex.Instance.ShowDeveloperGames(GameStateController.DeveloperID);
+				Scoreflex.ShowDeveloperGames(GameStateController.DeveloperID);
 			}
 		}
+
 		GUILayout.EndArea();
 	}
 }

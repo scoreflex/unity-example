@@ -43,19 +43,19 @@ public static class GameStateController
 
 	public static void EndGame()
 	{
-		if(Scoreflex.Instance.Live)
+		if(Scoreflex.Live)
 		{
 			if(State.challengeId == null)
 			{
-				Scoreflex.Instance.SubmitScoreAndShowRanksPanel(LeaderboardID, State.hits, gravity:Scoreflex.Gravity.Bottom);
+				Scoreflex.SubmitScoreAndShowRanksPanel(LeaderboardID, State.hits, gravity:Scoreflex.Gravity.Bottom);
 			}
 			else
 			{
 				var param = new Dictionary<string,object>();
 				if(ChallengeHandler.turnSequence != null) param["turnSequence"] = (object) ChallengeHandler.turnSequence;
 
-				Scoreflex.Instance.SubmitTurnAndShowChallengeDetail(State.challengeId, State.hits, param);
-				Scoreflex.Instance.SubmitScore(LeaderboardID, State.hits);
+				Scoreflex.SubmitTurnAndShowChallengeDetail(State.challengeId, State.hits, param);
+				Scoreflex.SubmitScore(LeaderboardID, State.hits);
 			}
 		}
 		State = null;
@@ -68,18 +68,18 @@ public static class GameStateController
 
 	public static void NewGame()
 	{
-		if(Scoreflex.Instance.Live)
+		if(Scoreflex.Live)
 		{
-			Scoreflex.Instance.HideRanksPanel();
+			Scoreflex.HideRanksPanel();
 		}
 		State = new GameState();
 	}
 
 	public static void AcceptChallenge(string challengeId)
 	{
-		if(Scoreflex.Instance.Live)
+		if(Scoreflex.Live)
 		{
-			Scoreflex.Instance.HideRanksPanel();
+			Scoreflex.HideRanksPanel();
 		}
 		NewGame();
 		State.challengeId = challengeId;

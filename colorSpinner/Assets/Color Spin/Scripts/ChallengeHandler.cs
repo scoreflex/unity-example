@@ -5,8 +5,8 @@ public class ChallengeHandler : MonoBehaviour
 {
 	void Start()
 	{
-		Scoreflex.Instance.PlaySoloHandlers += HandlePlaySolo;
-		Scoreflex.Instance.ChallengeHandlers += HandleChallenge;
+		Scoreflex.PlaySoloHandlers += HandlePlaySolo;
+		Scoreflex.ChallengeHandlers += HandleChallenge;
 	}
 
 	public static string turnSequence;
@@ -42,7 +42,7 @@ public class ChallengeHandler : MonoBehaviour
 
 	void OnDestroy()
 	{
-		Scoreflex.Instance.PlaySoloHandlers -= HandlePlaySolo;
-		Scoreflex.Instance.ChallengeHandlers -= HandleChallenge;
+		Scoreflex.PlaySoloHandlers -= HandlePlaySolo;
+		Scoreflex.ChallengeHandlers -= HandleChallenge;
 	}
 }
