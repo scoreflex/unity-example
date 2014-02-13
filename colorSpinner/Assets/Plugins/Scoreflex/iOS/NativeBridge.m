@@ -133,6 +133,18 @@ void scoreflexListenForChallengesAndPlaySolo()
 	}];
 }
 
+void scoreflexGetLanguageCode(void *buffer, int bufferLength)
+{
+	NSString *languageCode = [Scoreflex languageCode];
+	[languageCode getCString:buffer maxLength:bufferLength encoding:NSUnicodeStringEncoding];
+}
+
+void scoreflexSetLanguageCode(const unichar *_languageCode)
+{
+	NSString *languageCode = fromUnichar(_languageCode);
+	[Scoreflex setLanguageCode:languageCode];
+}
+
 void scoreflexGetPlayerId(void *buffer, int bufferLength)
 {
 	NSString *playerId = [Scoreflex getPlayerId];
@@ -188,15 +200,24 @@ void scoreflexHidePanelView(int key)
 	}
 }
 
-// handleNotification?
-
-// handleURL?
-
-// isReachable?
-
-// languageCode?
-
 // location?
+
+void scoreflexPreloadResource(const unichar *_resource)
+{
+	NSString *resource = fromUnichar(_resource);
+	[Scoreflex preloadResource:resource];
+}
+
+void scoreflexFreePreloadedResource(const unichar *_resource)
+{
+	NSString *resource = fromUnichar(_resource);
+	[Scoreflex freePreloadedResource:resource];
+}
+
+int32_t scoreflexIsReachable()
+{
+	return [Scoreflex isReachable] ? 1 : 0;
+}
 
 void scoreflexSetDeviceToken(const unichar *_deviceToken)
 {

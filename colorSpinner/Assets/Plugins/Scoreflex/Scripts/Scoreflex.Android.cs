@@ -14,6 +14,9 @@ public partial class Scoreflex
 		{ Gravity.Top, 48 }
 	};
 
+	// These three figures below could be cached or loaded only on startup but anyone attempting to
+	// do this should verify that their state continues to be valid.
+
 	private static AndroidJavaObject UnityActivity { get {
 			var unityPlayerClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
 			var activity = unityPlayerClass.GetStatic<AndroidJavaObject>("currentActivity");
@@ -57,7 +60,6 @@ public partial class Scoreflex
 		}
 	}
 
-	#region Internal queue to handler callbacks from Java runtime on the Unity main thread.
 	private string lastObservedInstanceName = null;
 	void Update()
 	{
@@ -69,7 +71,32 @@ public partial class Scoreflex
 			lastObservedInstanceName = currentName;
 		}
 	}
-	#endregion
+	
+	public void _PreloadResource(string resource)
+	{
+		Helper.CallStatic("preloadResource", UnityActivity, resource);
+	}
+	
+	public void _FreePreloadedResource(string resource)
+	{
+		Helper.CallStatic("freePreloadedResources", UnityActivity, resource);
+	}
+	
+	public bool _IsReachable {
+		get {
+			return ScoreflexClass.CallStatic<bool>("isReachable");
+		}
+	}
+	
+	public string _GetLanguageCode()
+	{
+		return ScoreflexClass.CallStatic<string>("getLang");
+	}
+	
+	public void _SetLanguageCode(string languageCode)
+	{
+		ScoreflexClass.CallStatic("setLang", languageCode);
+	}
 
 	private static Dictionary<string,object> PullFiguresFromResponse(AndroidJavaObject response)
 	{
@@ -126,20 +153,18 @@ public partial class Scoreflex
 
 	private AndroidJavaObject CreateRequestParamsFromDictionary(Dictionary<string,object> source, long? score = null)
 	{
-		AndroidJavaClass mapAssist = new AndroidJavaClass("com.scoreflex.unity3d.MapAssist");
-
 		AndroidJavaObject map = new AndroidJavaObject("java.util.HashMap");
 		if(source != null)
 		{
 			foreach(KeyValuePair<string,object> kvp in source)
 			{
 				var value = kvp.Value == null ? null : kvp.Value.ToString();
-				mapAssist.CallStatic("put", map, kvp.Key, value);
+				Helper.CallStatic("put", map, kvp.Key, value);
 			}
 		}
 		if(score.HasValue)
 		{
-			mapAssist.CallStatic("put", map, "score", score.Value.ToString());
+			Helper.CallStatic("put", map, "score", score.Value.ToString());
 		}
 		AndroidJavaObject requestParams = new AndroidJavaObject("com.scoreflex.Scoreflex$RequestParams", map);
 		return requestParams;
@@ -168,10 +193,6 @@ public partial class Scoreflex
 		AddParametersToIntentIfNotNull(intent, parameters);
 		StartActivityWithIntent(intent);
 	}
-
-	//private readonly Dictionary<int,AndroidJavaObject> scoreflexViewByHandle = new Dictionary<int,AndroidJavaObject>();
-
-
 
 	public void registerForPushNotification()
 	{

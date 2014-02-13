@@ -135,6 +135,32 @@ public partial class Scoreflex : MonoBehaviour
 
 	// WRAPPERS //
 
+	public string GetLanguageCode()
+	{
+		return _GetLanguageCode();
+	}
+
+	public void SetLanguageCode(string languageCode)
+	{
+		_SetLanguageCode(languageCode);
+	}
+
+	public void PreloadResource(string resource)
+	{
+		_PreloadResource(resource);
+	}
+
+	public void FreePreloadedResource(string resource)
+	{
+		_FreePreloadedResource(resource);
+	}
+
+	public bool IsReachable {
+		get {
+			return _IsReachable;
+		}
+	}
+
 	public static string GetPlayerId()
 	{
 		if(!Live) {

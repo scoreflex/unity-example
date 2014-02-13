@@ -1,7 +1,6 @@
 package com.scoreflex.unity3d;
 
 import com.scoreflex.Scoreflex;
-import com.unity3d.player.UnityPlayer;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

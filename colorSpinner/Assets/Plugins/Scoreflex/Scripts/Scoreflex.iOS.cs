@@ -32,6 +32,22 @@ public partial class Scoreflex
 		}
 	}
 
+	public void _PreloadResource(string resource)
+	{
+		scoreflexPreloadResource(resource);
+	}
+	
+	public void _FreePreloadedResource(string resource)
+	{
+		scoreflexFreePreloadedResource(resource);
+	}
+	
+	public bool _IsReachable {
+		get {
+			return scoreflexIsReachable();
+		}
+	}
+
 	public string _GetPlayerId()
 	{
 		var buffer = new byte[512];
@@ -264,8 +280,33 @@ public partial class Scoreflex
 
 		scoreflexSubmitTurnAndShowChallengeDetail(challengeLeaderboardId, score, json);
 	}
+	
+	public string _GetLanguageCode()
+	{
+		var buffer = new byte[512];
+		scoreflexGetLanguageCode(buffer, buffer.Length);
+		int stringLength = 0;
+		while(stringLength < buffer.Length && buffer[stringLength] != '\0') stringLength++;
+		string result = System.Text.Encoding.Unicode.GetString(buffer);
+		return result;
+	}
+
+	public void _SetLanguageCode(string languageCode)
+	{
+		scoreflexSetLanguageCode(languageCode);
+	}
 
 	#region Imports
+
+	[DllImport ("__Internal", CharSet = CharSet.Unicode)]
+	private static extern void scoreflexPreloadResource(string resource);
+
+	[DllImport ("__Internal", CharSet = CharSet.Unicode)]
+	private static extern void scoreflexFreePreloadedResource(string resource);
+
+	[DllImport ("__Internal")]
+	[return: MarshalAsAttribute(UnmanagedType.Bool)]
+	private static extern bool scoreflexIsReachable();
 
 	[DllImport ("__Internal", CharSet = CharSet.Unicode)]
 	private static extern void scoreflexGet(string resource, string json = null, string handler = null);
@@ -295,7 +336,13 @@ public partial class Scoreflex
 	private static extern void scoreflexSetUnityObjectName(string unityObjectName);
 
 	[DllImport ("__Internal", CharSet = CharSet.Unicode)]
-	private static extern void scoreflexSetClientId(string clientId, string secret, bool sandbox);
+	private static extern void scoreflexSetClientId(string clientId, string secret, [MarshalAs(UnmanagedType.Bool)] bool sandbox);
+	
+	[DllImport ("__Internal")]
+	private static extern void scoreflexGetLanguageCode(byte[] buffer, int bufferLength);
+	
+	[DllImport ("__Internal", CharSet = CharSet.Unicode)]
+	private static extern void scoreflexSetLanguageCode(string languageCode);
 
 	[DllImport ("__Internal")]
 	private static extern void scoreflexGetPlayerId(byte[] buffer, int bufferLength);

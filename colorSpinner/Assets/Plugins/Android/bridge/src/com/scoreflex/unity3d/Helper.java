@@ -1,5 +1,7 @@
 package com.scoreflex.unity3d;
 
+import java.util.Map;
+
 import com.scoreflex.Scoreflex;
 import com.scoreflex.ScoreflexView;
 import com.unity3d.player.UnityPlayer;
@@ -35,10 +37,33 @@ public class Helper
 	public static void setGameObjectName(final String gameObjectName) {
 		Helper.gameObjectName = gameObjectName;
 	}
+
+	public static void put(Map<Object,Object> map, Object key, Object value)
+	{
+		map.put(key,  value);
+	}
 	
 	public static void sendMessage(final String method, final String message)
 	{
 		UnityPlayer.UnitySendMessage(gameObjectName, method, message);
+	}
+	
+	public static void preloadResource(final Activity activity, final String resource)
+	{
+		activity.runOnUiThread(new Runnable() {
+			public void run() {
+				Scoreflex.preloadResource(activity, resource);
+			}
+		});
+	}
+	
+	public static void freePreloadedResources(final Activity activity, final String resource)
+	{
+		activity.runOnUiThread(new Runnable() {
+			public void run() {
+				Scoreflex.freePreloadedResources(resource);
+			}
+		});
 	}
 	
 	public static void startActivityWithIntent(final Activity activity, final Intent intent)
