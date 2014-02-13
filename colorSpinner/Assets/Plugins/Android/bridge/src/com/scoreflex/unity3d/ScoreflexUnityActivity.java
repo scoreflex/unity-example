@@ -13,6 +13,5 @@ public class ScoreflexUnityActivity extends UnityPlayerActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Scoreflex.onCreateMainActivity(this, this.getIntent(), true);
-
 	}
 }
